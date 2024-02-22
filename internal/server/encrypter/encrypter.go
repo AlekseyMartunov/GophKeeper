@@ -8,17 +8,13 @@ import (
 	"io"
 )
 
-type config interface {
-	SecretKey() string
-}
-
 type EncryptionManager struct {
 	gcm cipher.AEAD
 }
 
-func NewEncryptionManager(cfg config) *EncryptionManager {
+func NewEncryptionManager(secretKey string) *EncryptionManager {
 	hasher := md5.New()
-	hasher.Write([]byte(cfg.SecretKey()))
+	hasher.Write([]byte(secretKey))
 
 	block, _ := aes.NewCipher(hasher.Sum(nil))
 	gcm, _ := cipher.NewGCM(block)
