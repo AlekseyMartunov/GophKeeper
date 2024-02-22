@@ -1,9 +1,10 @@
 package data
 
 import (
+	"context"
+
 	"GophKeeper/internal/server/entity/data"
 	"GophKeeper/internal/server/entity/users"
-	"context"
 )
 
 type pairRepo interface {
@@ -13,27 +14,27 @@ type pairRepo interface {
 	Delete(ctx context.Context, user users.User, ExternalID string) error
 }
 
-type coder interface {
-	Encode(value string) string
-	Decode(value string) string
-	DecodeForAll([]data.Pair) []data.Pair
+type encrypt interface {
+	Encrypt(value string) string
+	Decrypt(value string) string
+	DecryptForAll([]data.Pair) []data.Pair
 }
 
 type PairService struct {
-	repo  pairRepo
-	coder coder
+	repo      pairRepo
+	encrypter encrypt
 }
 
-func NewPairService(r pairRepo, c coder) *PairService {
+func NewPairService(r pairRepo, e encrypt) *PairService {
 	return &PairService{
-		repo:  r,
-		coder: c,
+		repo:      r,
+		encrypter: e,
 	}
 }
 
 func (ps *PairService) Save(ctx context.Context, pair data.Pair, user users.User) error {
-	pair.Password = ps.coder.Encode(pair.Password)
-	pair.Login = ps.coder.Encode(pair.Login)
+	pair.Password = ps.encrypter.Encrypt(pair.Password)
+	pair.Login = ps.encrypter.Encrypt(pair.Login)
 
 	err := ps.repo.Save(ctx, pair, user)
 	return err
@@ -44,8 +45,8 @@ func (ps *PairService) Get(ctx context.Context, user users.User, ExternalID stri
 	if err != nil {
 		return pair, err
 	}
-	pair.Login = ps.coder.Decode(pair.Login)
-	pair.Password = ps.coder.Decode(pair.Password)
+	pair.Login = ps.encrypter.Decrypt(pair.Login)
+	pair.Password = ps.encrypter.Decrypt(pair.Password)
 
 	return pair, nil
 }
@@ -56,7 +57,7 @@ func (ps *PairService) GetAll(ctx context.Context, user users.User) ([]data.Pair
 		return nil, err
 	}
 
-	pairs = ps.coder.DecodeForAll(pairs)
+	pairs = ps.encrypter.DecryptForAll(pairs)
 	return pairs, err
 }
 
