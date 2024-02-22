@@ -8,7 +8,7 @@ import (
 
 type userRepo interface {
 	Save(ctx context.Context, user users.User) error
-	Get(ctx context.Context, ID string) (users.User, error)
+	GetExternalID(ctx context.Context, user users.User) (string, error)
 }
 
 type hasher interface {
@@ -33,7 +33,7 @@ func (us *UserService) Save(ctx context.Context, user users.User) error {
 	return err
 }
 
-func (us *UserService) Get(ctx context.Context, ID string) (users.User, error) {
-	user, err := us.repo.Get(ctx, ID)
-	return user, err
+func (us *UserService) GetExternalID(ctx context.Context, user users.User) (string, error) {
+	ID, err := us.repo.GetExternalID(ctx, user)
+	return ID, err
 }
