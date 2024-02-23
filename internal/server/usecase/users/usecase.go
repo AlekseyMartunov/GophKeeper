@@ -1,9 +1,8 @@
-package users
+package usersservice
 
 import (
-	"context"
-
 	"GophKeeper/internal/server/entity/users"
+	"context"
 )
 
 type userRepo interface {
@@ -12,7 +11,7 @@ type userRepo interface {
 }
 
 type hasher interface {
-	Hash(value string) string
+	Hash(value, key string) string
 }
 
 type UserService struct {
@@ -28,12 +27,13 @@ func NewUserService(r userRepo, h hasher) *UserService {
 }
 
 func (us *UserService) Save(ctx context.Context, user users.User) error {
-	user.Password = us.hasher.Hash(user.Password)
+	user.Password = us.hasher.Hash(user.Password, user.Login)
 	err := us.repo.Save(ctx, user)
 	return err
 }
 
 func (us *UserService) GetExternalID(ctx context.Context, user users.User) (string, error) {
+	user.Password = us.hasher.Hash(user.Password, user.Login)
 	ID, err := us.repo.GetExternalID(ctx, user)
 	return ID, err
 }

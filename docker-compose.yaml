@@ -1,0 +1,13 @@
+version: "latest"
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5432:5432"
+
+
+# "postgres://admin:1234@localhost:5432/test?sslmode=disable"

@@ -1,4 +1,4 @@
-package postgres
+package usersrepo
 
 import (
 	"GophKeeper/internal/server/entity/users"
@@ -9,7 +9,7 @@ import (
 )
 
 func (us *UserStorage) Save(ctx context.Context, user users.User) error {
-	query := `INSERT INTO client (login, password) VALUES ($1, $2)`
+	query := `INSERT INTO users (login, password) VALUES ($1, $2)`
 	_, err := us.conn.Exec(ctx, query, user.Login, user.Password)
 
 	if err != nil {

@@ -1,4 +1,4 @@
-package router
+package userrouter
 
 import (
 	"github.com/gofiber/fiber/v2"

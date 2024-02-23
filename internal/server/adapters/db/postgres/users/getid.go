@@ -1,4 +1,4 @@
-package postgres
+package usersrepo
 
 import (
 	"GophKeeper/internal/server/entity/users"
@@ -8,14 +8,14 @@ import (
 )
 
 func (us *UserStorage) GetExternalID(ctx context.Context, user users.User) (string, error) {
-	query := `SELECT ExternalID FROM client WHERE login = $1 AND password = $2`
+	query := `SELECT external_id FROM users WHERE login = $1 AND password = $2`
 	res := us.conn.QueryRow(ctx, query, user.Login, user.Password)
 
 	var ID string
 
 	if err := res.Scan(&ID); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", users.ErrUserAlreadyExists
+			return "", users.ErrUserDoseNotExist
 		}
 		return "", err
 	}

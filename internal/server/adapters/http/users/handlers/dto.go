@@ -1,4 +1,4 @@
-package handlers
+package userhandlers
 
 import "GophKeeper/internal/server/entity/users"
 
