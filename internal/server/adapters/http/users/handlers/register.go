@@ -1,12 +1,14 @@
 package userhandlers
 
 import (
-	"GophKeeper/internal/server/entity/users"
 	"encoding/json"
 	"errors"
-	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
+
+	"GophKeeper/internal/server/entity/users"
+
+	"github.com/labstack/echo/v4"
 )
 
 func (uh *UserHandler) Register(c echo.Context) error {

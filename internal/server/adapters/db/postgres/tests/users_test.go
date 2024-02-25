@@ -18,7 +18,7 @@ import (
 // ==============================================================================
 //
 //
-// there is a docker-compose.yml file in the main project folder
+// there is a docker-compose.yml file in the build folder, in main project folder
 
 const (
 	dns = "postgres://admin:1234@localhost:5432/test?sslmode=disable"

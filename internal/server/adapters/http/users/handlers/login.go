@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"GophKeeper/internal/server/entity/users"
-	"GophKeeper/internal/server/jwt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/labstack/echo/v4"
@@ -38,13 +37,6 @@ func (uh *UserHandler) Login(c echo.Context) error {
 
 	token, err := uh.jwt.CreateToken(externalID)
 	if err != nil {
-		if errors.Is(err, jwt.ErrInvalidToken) {
-			return c.JSON(http.StatusUnauthorized, invalidToken)
-		}
-
-		if errors.Is(err, jwt.ErrExpiredToken) {
-			return c.JSON(http.StatusUnauthorized, expireToken)
-		}
 		uh.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}

@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"GophKeeper/internal/server/adapters/http/users/tests/mock"
 	"context"
 	"errors"
 	"net/http"
@@ -9,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	userhandlers "GophKeeper/internal/server/adapters/http/users/handlers"
+	userHandlers "GophKeeper/internal/server/adapters/http/users/handlers"
+	"GophKeeper/internal/server/adapters/http/users/tests/mock"
 	"GophKeeper/internal/server/entity/users"
-	"GophKeeper/internal/server/jwt"
 
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
@@ -31,7 +30,7 @@ func TestLoginHandler(t *testing.T) {
 	mockUserService := mock_userhandlers.NewMockuserService(ctrl)
 	mockJWT := mock_userhandlers.NewMocktokenJWTManager(ctrl)
 
-	userHandlers := userhandlers.NewUserHandler(mockUserService, mockLogger, mockJWT)
+	userHandlers := userHandlers.NewUserHandler(mockUserService, mockLogger, mockJWT)
 
 	//===========================TEST 1===========================
 	u1 := users.User{
@@ -73,22 +72,6 @@ func TestLoginHandler(t *testing.T) {
 	mockUserService.EXPECT().GetExternalID(context.Background(), u5).Return("ID", nil)
 	mockJWT.EXPECT().CreateToken("ID").Return("", errors.New("some error"))
 
-	//===========================TEST 6===========================
-	u6 := users.User{
-		Password: "pass",
-		Login:    "123",
-	}
-	mockUserService.EXPECT().GetExternalID(context.Background(), u6).Return("ID", nil)
-	mockJWT.EXPECT().CreateToken("ID").Return("", jwt.ErrExpiredToken)
-
-	//===========================TEST 7===========================
-	u7 := users.User{
-		Password: "pass",
-		Login:    "123",
-	}
-	mockUserService.EXPECT().GetExternalID(context.Background(), u7).Return("ID", nil)
-	mockJWT.EXPECT().CreateToken("ID").Return("", jwt.ErrInvalidToken)
-
 	testCase := []struct {
 		name         string
 		body         string
@@ -124,18 +107,6 @@ func TestLoginHandler(t *testing.T) {
 			body:         `{"login":"123", "password":"pass"}`,
 			statusCode:   500,
 			bodyResponse: `"internal server error"`,
-		},
-		{
-			name:         "test_6",
-			body:         `{"login":"123", "password":"pass"}`,
-			statusCode:   401,
-			bodyResponse: `"token has expired"`,
-		},
-		{
-			name:         "test_7",
-			body:         `{"login":"123", "password":"pass"}`,
-			statusCode:   401,
-			bodyResponse: `"your token is invalid"`,
 		},
 	}
 
