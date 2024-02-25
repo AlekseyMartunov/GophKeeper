@@ -5,6 +5,8 @@ import (
 	"context"
 )
 
+//go:generate mockgen -source=handler.go -destination=tests/mock/mock.go
+
 type userService interface {
 	GetExternalID(ctx context.Context, user users.User) (string, error)
 	Save(ctx context.Context, user users.User) error

@@ -1,17 +1,32 @@
 package userhandlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"GophKeeper/internal/server/entity/users"
+	"encoding/json"
+	"errors"
+	"github.com/labstack/echo/v4"
+	"io"
+	"net/http"
+)
 
-func (uh *UserHandler) Register(c *fiber.Ctx) error {
+func (uh *UserHandler) Register(c echo.Context) error {
 	dto := userDTO{}
 
-	if err := c.BodyParser(&dto); err != nil {
-		return err
+	number, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	if err := uh.service.Save(c.Context(), dto.ToEntity()); err != nil {
-		return err
+	if err := json.Unmarshal(number, &dto); err != nil {
+		return c.JSON(http.StatusBadRequest, requestParsingError)
 	}
 
-	return c.JSON(dto)
+	if err := uh.service.Save(c.Request().Context(), dto.ToEntity()); err != nil {
+		if errors.Is(err, users.ErrUserAlreadyExists) {
+			return c.JSON(http.StatusConflict, userAlreadyExists)
+		}
+		return c.JSON(http.StatusInternalServerError, internalServerError)
+	}
+
+	return c.JSON(http.StatusOK, dto)
 }

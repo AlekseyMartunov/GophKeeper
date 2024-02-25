@@ -1,6 +1,7 @@
 package migration
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -23,7 +24,7 @@ func UsersMigration(dsn string) error {
 
 	err = m.Up()
 	if err != nil {
-		if err != migrate.ErrNoChange {
+		if !errors.Is(err, migrate.ErrNoChange) {
 			return fmt.Errorf("user migration error: %w", err)
 		}
 	}

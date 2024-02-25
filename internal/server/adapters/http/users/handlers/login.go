@@ -1,27 +1,40 @@
 package userhandlers
 
 import (
+	"GophKeeper/internal/server/entity/users"
+	"encoding/json"
+	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
+	"io"
+	"net/http"
 	"strings"
 )
 
-func (uh *UserHandler) Login(c *fiber.Ctx) error {
+func (uh *UserHandler) Login(c echo.Context) error {
 	dto := userDTO{}
 
-	if err := c.BodyParser(&dto); err != nil {
-		return err
+	number, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	externalID, err := uh.service.GetExternalID(c.Context(), dto.ToEntity())
+	if err := json.Unmarshal(number, &dto); err != nil {
+		c.JSON(http.StatusBadRequest, requestParsingError)
+	}
+
+	externalID, err := uh.service.GetExternalID(c.Request().Context(), dto.ToEntity())
 	if err != nil {
-		return err
+		if errors.Is(err, users.ErrUserDoseNotExist) {
+			return c.JSON(http.StatusNoContent, userDoseNotExist)
+		}
+		return c.JSON(fiber.StatusInternalServerError, internalServerError)
 	}
 
 	token, err := uh.jwt.CreateToken(externalID)
 	if err != nil {
-		return err
+		c.JSON(http.StatusInternalServerError, internalServerError)
 	}
-	c.Set("Authorization", strings.Join([]string{"Bearer", token}, " "))
 
-	return c.JSON(fiber.StatusOK)
+	return c.JSON(http.StatusOK, strings.Join([]string{"Your Token: Bearer", token}, " "))
 }

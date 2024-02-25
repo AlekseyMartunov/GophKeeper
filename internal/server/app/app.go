@@ -8,11 +8,13 @@ import (
 	"GophKeeper/internal/server/config"
 	"GophKeeper/internal/server/hasher"
 	"GophKeeper/internal/server/jwt"
+	"GophKeeper/internal/server/logger"
 	usersService "GophKeeper/internal/server/usecase/users"
 	"context"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo/v4"
+	"net/http"
 	"time"
 )
 
@@ -33,20 +35,24 @@ func Run(ctx context.Context) error {
 
 	token := jwt.NewTokenManager(tokenExpTime, cfg.SecretKey())
 	hash := hasher.NewHasher(cfg.Salt())
+	log := logger.NewLogger()
 
 	userStorage := usersRepo.NewUserStorage(pool)
 	userService := usersService.NewUserService(userStorage, hash)
-	userHandler := userHandlers.NewUserHandler(userService, nil, token)
+	userHandler := userHandlers.NewUserHandler(userService, log, token)
 	userRouter := userRouter.NewUserControllerHTTP(userHandler)
 
-	userApp := userRouter.Route()
+	e := echo.New()
+	userRouter.Route(e)
 
-	mainApp := fiber.New()
+	srv := http.Server{
+		Addr:    cfg.RunAddr(),
+		Handler: e,
+	}
 
-	mainApp.Mount("/api/users", userApp)
-
-	//mainApp.ListenTLS("", "", "")
-	mainApp.Listen(":8080")
+	if err = srv.ListenAndServe(); err != http.ErrServerClosed {
+		return fmt.Errorf("listen and serve error: %w", err)
+	}
 
 	return nil
 }

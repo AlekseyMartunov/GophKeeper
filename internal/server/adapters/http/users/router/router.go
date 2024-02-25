@@ -1,12 +1,12 @@
 package userrouter
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
 type userHandlers interface {
-	Register(ctx *fiber.Ctx) error
-	Login(ctx *fiber.Ctx) error
+	Register(c echo.Context) error
+	Login(c echo.Context) error
 }
 
 type UserControllerHTTP struct {
@@ -19,11 +19,8 @@ func NewUserControllerHTTP(uh userHandlers) *UserControllerHTTP {
 	}
 }
 
-func (uc *UserControllerHTTP) Route() *fiber.App {
-	app := fiber.New()
+func (uc *UserControllerHTTP) Route(e *echo.Echo) {
+	e.POST("users/register", uc.handlers.Register)
+	e.POST("users/login", uc.handlers.Login)
 
-	app.Post("/register", uc.handlers.Register)
-	app.Post("/login", uc.handlers.Login)
-
-	return app
 }

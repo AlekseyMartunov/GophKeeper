@@ -7,9 +7,9 @@ type userDTO struct {
 	Password string `json:"password"`
 }
 
-func (u *userDTO) ToEntity() users.User {
+func (dto *userDTO) ToEntity() users.User {
 	return users.User{
-		Login:    u.Login,
-		Password: u.Password,
+		Login:    dto.Login,
+		Password: dto.Password,
 	}
 }
