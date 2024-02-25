@@ -1,8 +1,8 @@
 package app
 
 import (
+	"GophKeeper/internal/server/adapters/db/postgres/migration"
 	usersRepo "GophKeeper/internal/server/adapters/db/postgres/users"
-	"GophKeeper/internal/server/adapters/db/postgres/users/migration"
 	userHandlers "GophKeeper/internal/server/adapters/http/users/handlers"
 	userRouter "GophKeeper/internal/server/adapters/http/users/router"
 	"GophKeeper/internal/server/config"
@@ -23,7 +23,7 @@ const tokenExpTime = time.Second * 60 * 60 * 24
 func Run(ctx context.Context) error {
 	cfg := config.NewConfig()
 
-	err := migration.UsersMigration(cfg.PostgresDSN())
+	err := migration.UserMigrationsUp(cfg.PostgresDSN())
 	if err != nil {
 		return fmt.Errorf("migration err: %w", err)
 	}

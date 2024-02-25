@@ -9,6 +9,7 @@ import (
 )
 
 var ErrInvalidToken = errors.New("invalid token")
+var ErrExpiredToken = errors.New("token is expired")
 
 type TokenManager struct {
 	tokenTTL  time.Duration
@@ -57,11 +58,13 @@ func (t *TokenManager) GetUserID(tokenString string) (string, error) {
 	})
 
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return "", ErrExpiredToken
+		}
 		return "", ErrInvalidToken
 	}
 
 	if !token.Valid {
-
 		return "", ErrInvalidToken
 	}
 

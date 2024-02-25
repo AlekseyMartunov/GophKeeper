@@ -1,18 +1,20 @@
 package tests
 
 import (
-	userhandlers "GophKeeper/internal/server/adapters/http/users/handlers"
-	mock_userhandlers "GophKeeper/internal/server/adapters/http/users/handlers/tests/mock"
-	"GophKeeper/internal/server/entity/users"
+	"GophKeeper/internal/server/adapters/http/users/tests/mock"
 	"context"
 	"errors"
-	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	userhandlers "GophKeeper/internal/server/adapters/http/users/handlers"
+	"GophKeeper/internal/server/entity/users"
+
+	"github.com/golang/mock/gomock"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterHandler(t *testing.T) {
@@ -54,35 +56,30 @@ func TestRegisterHandler(t *testing.T) {
 
 	testCase := []struct {
 		name         string
-		url          string
 		body         string
 		statusCode   int
 		bodyResponse string
 	}{
 		{
 			name:         "test_1",
-			url:          "/register",
 			body:         `{"login":"123", "password":"pass"}`,
 			statusCode:   200,
 			bodyResponse: `{"login":"123","password":"pass"}`,
 		},
 		{
 			name:         "test_2",
-			url:          "/register",
 			body:         `{"login":"123", "password "pass"`,
 			statusCode:   400,
 			bodyResponse: `"the request form is incorrect or the request does not contain the required field"`,
 		},
 		{
 			name:         "test_3",
-			url:          "/register",
 			body:         `{"login":"123", "password":"pass"}`,
 			statusCode:   409,
 			bodyResponse: `"this login already used by another user"`,
 		},
 		{
 			name:         "test_4",
-			url:          "/register",
 			body:         `{"login":"123", "password":"pass"}`,
 			statusCode:   500,
 			bodyResponse: `"internal server error"`,
@@ -95,7 +92,7 @@ func TestRegisterHandler(t *testing.T) {
 
 			req := httptest.NewRequest(
 				http.MethodPost,
-				tc.url,
+				"/someURL",
 				strings.NewReader(tc.body))
 
 			rec := httptest.NewRecorder()
@@ -109,5 +106,4 @@ func TestRegisterHandler(t *testing.T) {
 			assert.Equal(t, tc.bodyResponse, strings.TrimSuffix(rec.Body.String(), "\n"))
 		})
 	}
-
 }

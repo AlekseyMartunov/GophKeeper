@@ -1,11 +1,12 @@
 package userhandlers
 
 import (
-	"GophKeeper/internal/server/entity/users"
 	"context"
+
+	"GophKeeper/internal/server/entity/users"
 )
 
-//go:generate mockgen -source=handler.go -destination=tests/mock/mock.go
+//go:generate mockgen -source=handlers/handler.go -destination=tests/mock/mock.go
 
 type userService interface {
 	GetExternalID(ctx context.Context, user users.User) (string, error)

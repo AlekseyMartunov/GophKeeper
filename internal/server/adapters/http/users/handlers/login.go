@@ -2,6 +2,7 @@ package userhandlers
 
 import (
 	"GophKeeper/internal/server/entity/users"
+	"GophKeeper/internal/server/jwt"
 	"encoding/json"
 	"errors"
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +21,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 	}
 
 	if err := json.Unmarshal(number, &dto); err != nil {
-		c.JSON(http.StatusBadRequest, requestParsingError)
+		return c.JSON(http.StatusBadRequest, requestParsingError)
 	}
 
 	externalID, err := uh.service.GetExternalID(c.Request().Context(), dto.ToEntity())
@@ -33,7 +34,15 @@ func (uh *UserHandler) Login(c echo.Context) error {
 
 	token, err := uh.jwt.CreateToken(externalID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, internalServerError)
+		if errors.Is(err, jwt.ErrInvalidToken) {
+			return c.JSON(http.StatusUnauthorized, invalidToken)
+		}
+
+		if errors.Is(err, jwt.ErrExpiredToken) {
+			return c.JSON(http.StatusUnauthorized, expireToken)
+		}
+
+		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
 	return c.JSON(http.StatusOK, strings.Join([]string{"Your Token: Bearer", token}, " "))
