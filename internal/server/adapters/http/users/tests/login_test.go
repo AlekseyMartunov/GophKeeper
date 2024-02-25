@@ -18,11 +18,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type myMockLogger struct{}
+
+func (l myMockLogger) Error(e error) {}
+func (l myMockLogger) Info(s string) {}
+
 func TestLoginHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockLogger := mock_userhandlers.NewMocklogger(ctrl)
+	mockLogger := myMockLogger{}
 	mockUserService := mock_userhandlers.NewMockuserService(ctrl)
 	mockJWT := mock_userhandlers.NewMocktokenJWTManager(ctrl)
 

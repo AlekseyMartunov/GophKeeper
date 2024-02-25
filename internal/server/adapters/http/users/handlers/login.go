@@ -1,15 +1,17 @@
 package userhandlers
 
 import (
-	"GophKeeper/internal/server/entity/users"
-	"GophKeeper/internal/server/jwt"
 	"encoding/json"
 	"errors"
-	"github.com/gofiber/fiber/v2"
-	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
 	"strings"
+
+	"GophKeeper/internal/server/entity/users"
+	"GophKeeper/internal/server/jwt"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
 func (uh *UserHandler) Login(c echo.Context) error {
@@ -17,6 +19,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 
 	number, err := io.ReadAll(c.Request().Body)
 	if err != nil {
+		uh.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
@@ -29,6 +32,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 		if errors.Is(err, users.ErrUserDoseNotExist) {
 			return c.JSON(http.StatusNoContent, userDoseNotExist)
 		}
+		uh.log.Error(err)
 		return c.JSON(fiber.StatusInternalServerError, internalServerError)
 	}
 
@@ -41,7 +45,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 		if errors.Is(err, jwt.ErrExpiredToken) {
 			return c.JSON(http.StatusUnauthorized, expireToken)
 		}
-
+		uh.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 

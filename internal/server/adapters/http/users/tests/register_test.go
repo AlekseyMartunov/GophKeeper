@@ -21,7 +21,7 @@ func TestRegisterHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockLogger := mock_userhandlers.NewMocklogger(ctrl)
+	mockLogger := myMockLogger{}
 	mockUserService := mock_userhandlers.NewMockuserService(ctrl)
 	mockJWT := mock_userhandlers.NewMocktokenJWTManager(ctrl)
 

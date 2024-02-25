@@ -9,18 +9,24 @@ type userHandlers interface {
 	Login(c echo.Context) error
 }
 
-type UserControllerHTTP struct {
-	handlers userHandlers
+type loggerMiddleware interface {
+	Logging(next echo.HandlerFunc) echo.HandlerFunc
 }
 
-func NewUserControllerHTTP(uh userHandlers) *UserControllerHTTP {
+type UserControllerHTTP struct {
+	handlers   userHandlers
+	middleware loggerMiddleware
+}
+
+func NewUserControllerHTTP(uh userHandlers, m loggerMiddleware) *UserControllerHTTP {
 	return &UserControllerHTTP{
-		handlers: uh,
+		handlers:   uh,
+		middleware: m,
 	}
 }
 
 func (uc *UserControllerHTTP) Route(e *echo.Echo) {
-	e.POST("users/register", uc.handlers.Register)
-	e.POST("users/login", uc.handlers.Login)
+	e.POST("users/register", uc.handlers.Register, uc.middleware.Logging)
+	e.POST("users/login", uc.handlers.Login, uc.middleware.Logging)
 
 }

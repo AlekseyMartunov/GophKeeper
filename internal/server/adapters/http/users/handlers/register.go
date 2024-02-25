@@ -14,6 +14,7 @@ func (uh *UserHandler) Register(c echo.Context) error {
 
 	number, err := io.ReadAll(c.Request().Body)
 	if err != nil {
+		uh.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
@@ -25,6 +26,7 @@ func (uh *UserHandler) Register(c echo.Context) error {
 		if errors.Is(err, users.ErrUserAlreadyExists) {
 			return c.JSON(http.StatusConflict, userAlreadyExists)
 		}
+		uh.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 

@@ -9,6 +9,7 @@ import (
 	"GophKeeper/internal/server/hasher"
 	"GophKeeper/internal/server/jwt"
 	"GophKeeper/internal/server/logger"
+	middlewarehttplogin "GophKeeper/internal/server/middleware/loginhttp"
 	usersService "GophKeeper/internal/server/usecase/users"
 	"context"
 	"fmt"
@@ -36,11 +37,12 @@ func Run(ctx context.Context) error {
 	token := jwt.NewTokenManager(tokenExpTime, cfg.SecretKey())
 	hash := hasher.NewHasher(cfg.Salt())
 	log := logger.NewLogger()
+	middlewareHTTPLogin := middlewarehttplogin.NewLoggerMiddleware(log)
 
 	userStorage := usersRepo.NewUserStorage(pool)
 	userService := usersService.NewUserService(userStorage, hash)
 	userHandler := userHandlers.NewUserHandler(userService, log, token)
-	userRouter := userRouter.NewUserControllerHTTP(userHandler)
+	userRouter := userRouter.NewUserControllerHTTP(userHandler, middlewareHTTPLogin)
 
 	e := echo.New()
 	userRouter.Route(e)
