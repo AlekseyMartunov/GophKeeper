@@ -1,9 +1,11 @@
 package usersrepo
 
 import (
-	"GophKeeper/internal/server/entity/users"
 	"context"
 	"errors"
+
+	"GophKeeper/internal/server/entity/users"
+
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 )

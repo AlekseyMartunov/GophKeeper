@@ -3,22 +3,23 @@ package migration
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"os"
-	"path/filepath"
 )
 
 const homeDir = "GophKeeper"
 
-func UserMigrationsUp(dsn string) error {
+func MigrationsUp(dsn string) error {
 	path, err := getHomeDir()
 	if err != nil {
 		return err
 	}
 
-	path = filepath.Join("file:", path, "migrations", "users")
+	path = filepath.Join("file:", path, "migrations")
 
 	m, err := migrate.New(path, dsn)
 	if err != nil {
@@ -35,13 +36,13 @@ func UserMigrationsUp(dsn string) error {
 	return nil
 }
 
-func UserMigrationsDown(dsn string) error {
+func MigrationsDown(dsn string) error {
 	path, err := getHomeDir()
 	if err != nil {
 		return err
 	}
 
-	path = filepath.Join("file:", path, "migrations", "users")
+	path = filepath.Join("file:", path, "migrations")
 
 	m, err := migrate.New(path, dsn)
 	if err != nil {
