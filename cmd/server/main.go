@@ -1,8 +1,9 @@
 package main
 
 import (
-	"GophKeeper/internal/server/app"
 	"context"
+
+	"GophKeeper/internal/server/app"
 )
 
 func main() {
