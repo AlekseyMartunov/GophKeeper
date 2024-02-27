@@ -1,7 +1,6 @@
-package tests
+package userhandlers
 
 import (
-	"GophKeeper/internal/server/adapters/http/users/tests/mock"
 	"context"
 	"errors"
 	"net/http"
@@ -9,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	userhandlers "GophKeeper/internal/server/adapters/http/users/handlers"
+	"GophKeeper/internal/server/adapters/http/users/handlers/mock"
 	"GophKeeper/internal/server/entity/users"
 
 	"github.com/golang/mock/gomock"
@@ -25,7 +24,7 @@ func TestRegisterHandler(t *testing.T) {
 	mockUserService := mock_userhandlers.NewMockuserService(ctrl)
 	mockJWT := mock_userhandlers.NewMocktokenJWTManager(ctrl)
 
-	userHandlers := userhandlers.NewUserHandler(mockUserService, mockLogger, mockJWT)
+	userHandlers := NewUserHandler(mockUserService, mockLogger, mockJWT)
 
 	//===========================TEST 1===========================
 

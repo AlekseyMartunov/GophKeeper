@@ -6,11 +6,11 @@ import (
 	"context"
 )
 
-func (ps *PairStorage) GetAll(ctx context.Context, user users.User) ([]pairs.Pair, error) {
+func (ps *PairStorage) GetAll(ctx context.Context, userID int) ([]pairs.Pair, error) {
 	query := `SELECT pair_id, pair_name, password, login, created_time, fk_user_id FROM pairs 
 			  WHERE fk_user_id = $1`
 
-	rows, err := ps.conn.Query(ctx, query, user.ID)
+	rows, err := ps.conn.Query(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}

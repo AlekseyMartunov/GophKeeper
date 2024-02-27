@@ -2,6 +2,7 @@ package app
 
 import (
 	"GophKeeper/internal/server/adapters/db/postgres/migration"
+	pairsRepo "GophKeeper/internal/server/adapters/db/postgres/pairs"
 	usersRepo "GophKeeper/internal/server/adapters/db/postgres/users"
 	userHandlers "GophKeeper/internal/server/adapters/http/users/handlers"
 	userRouter "GophKeeper/internal/server/adapters/http/users/router"
@@ -9,7 +10,8 @@ import (
 	"GophKeeper/internal/server/hasher"
 	"GophKeeper/internal/server/jwt"
 	"GophKeeper/internal/server/logger"
-	middlewarehttplogin "GophKeeper/internal/server/middleware/loginhttp"
+	middlewareHTTPLogin "GophKeeper/internal/server/middleware/loginhttp"
+	pairService "GophKeeper/internal/server/usecase/pairs"
 	usersService "GophKeeper/internal/server/usecase/users"
 	"context"
 	"fmt"
@@ -24,7 +26,7 @@ const tokenExpTime = time.Second * 60 * 60 * 24
 func Run(ctx context.Context) error {
 	cfg := config.NewConfig()
 
-	err := migration.UserMigrationsUp(cfg.PostgresDSN())
+	err := migration.MigrationsUp(cfg.PostgresDSN())
 	if err != nil {
 		return fmt.Errorf("migration err: %w", err)
 	}
@@ -37,12 +39,17 @@ func Run(ctx context.Context) error {
 	token := jwt.NewTokenManager(tokenExpTime, cfg.SecretKey())
 	hash := hasher.NewHasher(cfg.Salt())
 	log := logger.NewLogger()
-	middlewareHTTPLogin := middlewarehttplogin.NewLoggerMiddleware(log)
+	middlewareHTTPLogin := middlewareHTTPLogin.NewLoggerMiddleware(log)
 
 	userStorage := usersRepo.NewUserStorage(pool)
 	userService := usersService.NewUserService(userStorage, hash)
 	userHandler := userHandlers.NewUserHandler(userService, log, token)
 	userRouter := userRouter.NewUserControllerHTTP(userHandler, middlewareHTTPLogin)
+
+	pairStorage := pairsRepo.NewPairsStorage(pool)
+	pairService := pairService.NewPairService(pairStorage)
+
+	fmt.Println(pairService)
 
 	e := echo.New()
 	userRouter.Route(e)

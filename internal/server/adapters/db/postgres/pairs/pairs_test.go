@@ -74,24 +74,41 @@ func (suite *dataBaseSuite) TestSavePais() {
 	assert.NoError(suite.T(), err)
 	ctx := context.Background()
 
-	p := pairs.Pair{
+	p1 := pairs.Pair{
 		Name:        "login and password for example.com",
 		Login:       "some login",
 		Password:    "qwerty",
 		CreatedTime: time.Now(),
+		User:        users.User{ID: 1},
 	}
 
-	// user with id = 1 save pair
-	err = suite.repo.Save(ctx, p, users.User{ID: 1})
+	p2 := pairs.Pair{
+		Name:        "login and password for example.com",
+		Login:       "some login",
+		Password:    "qwerty",
+		CreatedTime: time.Now(),
+		User:        users.User{ID: 2},
+	}
+
+	p3 := pairs.Pair{
+		Name:        "login and password for example.com",
+		Login:       "some login",
+		Password:    "qwerty",
+		CreatedTime: time.Now(),
+		User:        users.User{ID: 1},
+	}
+
+	// user with id = 1 save pair1
+	err = suite.repo.Save(ctx, p1)
 	assert.NoError(suite.T(), err)
 
-	// user with id = 2 save pair
-	err = suite.repo.Save(ctx, p, users.User{ID: 2})
+	// user with id = 2 save pair2
+	err = suite.repo.Save(ctx, p2)
 	assert.NoError(suite.T(), err)
 
-	// user with id = 2 save pair
+	// user with id = 2 save pair3
 	// error because user with id = 2 already has pair with same name
-	err = suite.repo.Save(ctx, p, users.User{ID: 2})
+	err = suite.repo.Save(ctx, p3)
 	assert.ErrorIs(suite.T(), err, pairs.ErrPairAlreadyExists)
 }
 
@@ -101,7 +118,7 @@ func (suite *dataBaseSuite) TestGetPair() {
 	ctx := context.Background()
 
 	// get pair with name pair1 for user with id 1
-	result, err := suite.repo.Get(ctx, users.User{ID: 1}, "pair1")
+	result, err := suite.repo.Get(ctx, "pair1", 1)
 	assert.NoError(suite.T(), err)
 
 	wanted := pairs.Pair{
@@ -117,7 +134,7 @@ func (suite *dataBaseSuite) TestGetPair() {
 	assert.Equal(suite.T(), wanted.User, result.User)
 
 	// should be ErrPairDoseNotExist
-	result, err = suite.repo.Get(ctx, users.User{ID: 20}, "pair1")
+	result, err = suite.repo.Get(ctx, "pair1", 20)
 	assert.ErrorIs(suite.T(), err, pairs.ErrPairDoseNotExist)
 }
 
@@ -142,7 +159,7 @@ func (suite *dataBaseSuite) TestGetAllPairs() {
 	}
 
 	// get all pairs for user with id = 2
-	result, err := suite.repo.GetAll(ctx, users.User{ID: 2})
+	result, err := suite.repo.GetAll(ctx, 2)
 	assert.NoError(suite.T(), err)
 
 	for i, w := range wanted {
@@ -152,7 +169,7 @@ func (suite *dataBaseSuite) TestGetAllPairs() {
 		assert.Equal(suite.T(), w.User, result[i].User)
 	}
 
-	result, err = suite.repo.GetAll(ctx, users.User{ID: 20})
+	result, err = suite.repo.GetAll(ctx, 20)
 	assert.ErrorIs(suite.T(), err, pairs.ErrPairDoseNotExist)
 
 }
@@ -162,7 +179,7 @@ func (suite *dataBaseSuite) TestDelete() {
 	assert.NoError(suite.T(), err)
 	ctx := context.Background()
 
-	err = suite.repo.Delete(ctx, users.User{ID: 2}, "pair3")
+	err = suite.repo.Delete(ctx, "pair3", 2)
 	assert.NoError(suite.T(), err)
 
 	wanted := []pairs.Pair{
@@ -190,7 +207,7 @@ func (suite *dataBaseSuite) TestDelete() {
 	}
 
 	// nothing to delete
-	err = suite.repo.Delete(ctx, users.User{ID: 20}, "pair3")
+	err = suite.repo.Delete(ctx, "pair3", 20)
 	assert.ErrorIs(suite.T(), err, pairs.ErrPairNothingToDelete)
 }
 

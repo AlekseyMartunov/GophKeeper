@@ -2,16 +2,16 @@ package pairservice
 
 import (
 	"context"
+	"time"
 
 	"GophKeeper/internal/server/entity/pairs"
-	"GophKeeper/internal/server/entity/users"
 )
 
 type pairRepo interface {
-	Save(ctx context.Context, pair pairs.Pair, user users.User) error
-	Get(ctx context.Context, user users.User, name string) (pairs.Pair, error)
-	GetAll(ctx context.Context, user users.User) ([]pairs.Pair, error)
-	Delete(ctx context.Context, user users.User, name string) error
+	Save(ctx context.Context, pair pairs.Pair) error
+	Get(ctx context.Context, pairName string, userID int) (pairs.Pair, error)
+	GetAll(ctx context.Context, userID int) ([]pairs.Pair, error)
+	Delete(ctx context.Context, pairName string, userID int) error
 }
 
 type PairService struct {
@@ -24,22 +24,23 @@ func NewPairService(r pairRepo) *PairService {
 	}
 }
 
-func (ps *PairService) Save(ctx context.Context, pair pairs.Pair, user users.User) error {
-	err := ps.repo.Save(ctx, pair, user)
+func (ps *PairService) Save(ctx context.Context, pair pairs.Pair) error {
+	pair.CreatedTime = time.Now()
+	err := ps.repo.Save(ctx, pair)
 	return err
 }
 
-func (ps *PairService) Get(ctx context.Context, user users.User, name string) (pairs.Pair, error) {
-	pair, err := ps.repo.Get(ctx, user, name)
+func (ps *PairService) Get(ctx context.Context, pairName string, userID int) (pairs.Pair, error) {
+	pair, err := ps.repo.Get(ctx, pairName, userID)
 	return pair, err
 }
 
-func (ps *PairService) GetAll(ctx context.Context, user users.User) ([]pairs.Pair, error) {
-	pairs, err := ps.repo.GetAll(ctx, user)
+func (ps *PairService) GetAll(ctx context.Context, userID int) ([]pairs.Pair, error) {
+	pairs, err := ps.repo.GetAll(ctx, userID)
 	return pairs, err
 }
 
-func (ps *PairService) Delete(ctx context.Context, user users.User, name string) error {
-	err := ps.repo.Delete(ctx, user, name)
+func (ps *PairService) Delete(ctx context.Context, pairName string, userID int) error {
+	err := ps.repo.Delete(ctx, pairName, userID)
 	return err
 }
