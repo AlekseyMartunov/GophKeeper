@@ -7,7 +7,7 @@ import (
 	"GophKeeper/internal/server/entity/users"
 )
 
-type nameToDeleteDTO struct {
+type nameDTO struct {
 	Name string `json:"name"`
 }
 

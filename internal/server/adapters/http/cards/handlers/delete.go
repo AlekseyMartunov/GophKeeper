@@ -1,17 +1,15 @@
-package pairhandlers
+package cardhandlers
 
 import (
+	"GophKeeper/internal/server/entity/card"
 	"encoding/json"
 	"errors"
+	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
-
-	"GophKeeper/internal/server/entity/pairs"
-
-	"github.com/labstack/echo/v4"
 )
 
-func (ph *PairHandler) Get(c echo.Context) error {
+func (ch *CardHandler) Delete(c echo.Context) error {
 	userID, ok := c.Get("userID").(int)
 	if !ok {
 		return c.JSON(http.StatusInternalServerError, internalServerError)
@@ -19,26 +17,23 @@ func (ph *PairHandler) Get(c echo.Context) error {
 
 	b, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		ph.log.Error(err)
+		ch.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	name := nameDTO{}
+	var name cardName
 
 	if err := json.Unmarshal(b, &name); err != nil {
 		return c.JSON(http.StatusBadRequest, requestParsingError)
 	}
 
-	pair, err := ph.service.Get(c.Request().Context(), name.Name, userID)
+	err = ch.service.Delete(c.Request().Context(), name.Name, userID)
 	if err != nil {
-		if errors.Is(err, pairs.ErrPairDoseNotExist) {
-			return c.JSON(http.StatusNoContent, pairDoseNotExist)
+		if errors.Is(err, card.ErrCardNothingToDelete) {
+			return c.JSON(http.StatusNoContent, card.ErrCardNothingToDelete)
 		}
-		ph.log.Error(err)
+		ch.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
-	dto := pairDTO{}
 
-	dto.fromEntity(pair)
-	return c.JSON(http.StatusOK, dto)
 }

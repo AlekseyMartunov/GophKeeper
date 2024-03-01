@@ -22,7 +22,7 @@ func (ph *PairHandler) Delete(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	var dto nameToDeleteDTO
+	var dto nameDTO
 
 	if err := json.Unmarshal(b, &dto); err != nil {
 		return c.JSON(http.StatusBadRequest, requestParsingError)

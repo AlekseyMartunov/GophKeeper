@@ -1,4 +1,4 @@
-package pairhandlers
+package cardhandlers
 
 import (
 	"encoding/json"
@@ -6,12 +6,12 @@ import (
 	"io"
 	"net/http"
 
-	"GophKeeper/internal/server/entity/pairs"
+	"GophKeeper/internal/server/entity/card"
 
 	"github.com/labstack/echo/v4"
 )
 
-func (ph *PairHandler) Get(c echo.Context) error {
+func (ch *CardHandler) Save(c echo.Context) error {
 	userID, ok := c.Get("userID").(int)
 	if !ok {
 		return c.JSON(http.StatusInternalServerError, internalServerError)
@@ -19,26 +19,24 @@ func (ph *PairHandler) Get(c echo.Context) error {
 
 	b, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		ph.log.Error(err)
+		ch.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	name := nameDTO{}
+	dto := cardDTO{}
 
-	if err := json.Unmarshal(b, &name); err != nil {
+	if err := json.Unmarshal(b, &dto); err != nil {
 		return c.JSON(http.StatusBadRequest, requestParsingError)
 	}
+	dto.userID = userID
 
-	pair, err := ph.service.Get(c.Request().Context(), name.Name, userID)
+	err = ch.service.Save(c.Request().Context(), dto.toEntity())
 	if err != nil {
-		if errors.Is(err, pairs.ErrPairDoseNotExist) {
-			return c.JSON(http.StatusNoContent, pairDoseNotExist)
+		if errors.Is(err, card.ErrCardAlreadyExists) {
+			return c.JSON(http.StatusConflict, cardAlreadyExists)
 		}
-		ph.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
-	dto := pairDTO{}
+	return c.JSON(http.StatusOK, messageOk)
 
-	dto.fromEntity(pair)
-	return c.JSON(http.StatusOK, dto)
 }

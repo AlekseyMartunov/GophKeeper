@@ -28,5 +28,4 @@ func NewUserControllerHTTP(uh userHandlers, m loggerMiddleware) *UserControllerH
 func (uc *UserControllerHTTP) Route(e *echo.Echo) {
 	e.POST("users/register", uc.handlers.Register, uc.middleware.Logging)
 	e.POST("users/login", uc.handlers.Login, uc.middleware.Logging)
-
 }
