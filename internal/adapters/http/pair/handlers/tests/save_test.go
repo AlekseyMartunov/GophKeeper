@@ -4,7 +4,6 @@ import (
 	pairHandlers "GophKeeper/internal/adapters/http/pair/handlers"
 	"GophKeeper/internal/adapters/http/pair/handlers/mocks"
 	"GophKeeper/internal/entity/pairs"
-	"GophKeeper/internal/entity/users"
 	"context"
 	"errors"
 	"net/http"
@@ -37,7 +36,7 @@ func TestSave(t *testing.T) {
 		Login:    "l",
 		Password: "p",
 		Name:     "p1",
-		User:     users.User{ID: 1},
+		UserID:   1,
 	}
 	mockPairService.EXPECT().Save(c, p1).Return(nil)
 
@@ -49,7 +48,7 @@ func TestSave(t *testing.T) {
 		Login:    "l",
 		Password: "p",
 		Name:     "p1",
-		User:     users.User{ID: 1},
+		UserID:   1,
 	}
 	mockPairService.EXPECT().Save(c, p3).Return(pairs.ErrPairAlreadyExists)
 
@@ -61,7 +60,7 @@ func TestSave(t *testing.T) {
 		Login:    "l",
 		Password: "p",
 		Name:     "p1",
-		User:     users.User{ID: 1},
+		UserID:   1,
 	}
 	mockPairService.EXPECT().Save(c, p5).Return(errors.New("new err"))
 

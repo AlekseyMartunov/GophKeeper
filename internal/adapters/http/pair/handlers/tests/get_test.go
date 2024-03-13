@@ -1,9 +1,6 @@
 package tests
 
 import (
-	pairHandlers "GophKeeper/internal/adapters/http/pair/handlers"
-	"GophKeeper/internal/adapters/http/pair/handlers/mocks"
-	"GophKeeper/internal/entity/pairs"
 	"context"
 	"errors"
 	"net/http"
@@ -11,6 +8,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	pairHandlers "GophKeeper/internal/adapters/http/pair/handlers"
+	"GophKeeper/internal/adapters/http/pair/handlers/mocks"
+	"GophKeeper/internal/entity/pairs"
 
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
@@ -42,58 +43,48 @@ func TestGet(t *testing.T) {
 	mockPairService.EXPECT().Get(c, "userName_1", 1).Return(p1, nil)
 
 	//===========================TEST 2===========================
-	// in test 2 handler return error before pairService called
-
-	//===========================TEST 3===========================
-	// in test 3 handler return error before pairService called
-
-	//===========================TEST 4===========================
 	mockPairService.EXPECT().Get(c, "userName_1", 1).Return(pairs.Pair{}, pairs.ErrPairDoseNotExist)
 
-	//===========================TEST 5===========================
+	//===========================TEST 3===========================
 	mockPairService.EXPECT().Get(c, "userName_1", 1).Return(pairs.Pair{}, errors.New("new err"))
+
+	//===========================TEST 4===========================
+	// in test 4 handler return error before pairService called
 
 	testCase := []struct {
 		name           string
-		body           string
 		statusCode     int
 		expectedBody   string
 		valueInContext string
+		urlKey         string
 	}{
 		{
 			name:           "test_1",
-			body:           `{"name": "userName_1"}`,
 			statusCode:     http.StatusOK,
 			expectedBody:   `{"login":"some log","password":"some pass","name":"pair for example.com","created_time":"2022-09-09T12:45:00Z"}`,
 			valueInContext: "userID",
+			urlKey:         "userName_1",
 		},
 		{
 			name:           "test_2",
-			body:           `"name": "userName_1"}`,
-			statusCode:     http.StatusBadRequest,
-			expectedBody:   `"the request form is incorrect or the request does not contain the required field"`,
-			valueInContext: "userID",
-		},
-		{
-			name:           "test_3",
-			body:           `"name": "userName_1"}`,
-			statusCode:     http.StatusInternalServerError,
-			expectedBody:   `"internal server error"`,
-			valueInContext: "userNAME",
-		},
-		{
-			name:           "test_4",
-			body:           `{"name": "userName_1"}`,
 			statusCode:     http.StatusNoContent,
 			expectedBody:   `"you do not have pair with this name"`,
 			valueInContext: "userID",
+			urlKey:         "userName_1",
 		},
 		{
-			name:           "test_5",
-			body:           `{"name": "userName_1"}`,
+			name:           "test_3",
 			statusCode:     http.StatusInternalServerError,
 			expectedBody:   `"internal server error"`,
 			valueInContext: "userID",
+			urlKey:         "userName_1",
+		},
+		{
+			name:           "test_4",
+			statusCode:     http.StatusInternalServerError,
+			expectedBody:   `"internal server error"`,
+			valueInContext: "ID_OF_USER",
+			urlKey:         "userName_1",
 		},
 	}
 
@@ -102,16 +93,19 @@ func TestGet(t *testing.T) {
 			e := echo.New()
 
 			req := httptest.NewRequest(
-				http.MethodPost,
+				http.MethodGet,
 				"/someURL",
-				strings.NewReader(tc.body))
+				nil,
+			)
 
 			rec := httptest.NewRecorder()
 			ctx := e.NewContext(req, rec)
+			ctx.SetParamNames("name")
+			ctx.SetParamValues(tc.urlKey)
 
 			ctx.Set(tc.valueInContext, 1)
 
-			err := pairHandlers.Get(ctx)
+			err = pairHandlers.Get(ctx)
 			assert.NoError(t, err, "Error creating test request")
 
 			assert.Equal(t, tc.statusCode, rec.Code)

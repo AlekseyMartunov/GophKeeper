@@ -2,7 +2,6 @@ package cardsrepo
 
 import (
 	"GophKeeper/internal/entity/card"
-	"GophKeeper/internal/entity/users"
 	"context"
 	"errors"
 
@@ -15,10 +14,8 @@ func (cs *CardStorage) Get(ctx context.Context, cardName string, userID int) (ca
 
 	row := cs.conn.QueryRow(ctx, query, cardName, userID)
 	var c card.Card
-	var u users.User
-	c.User = u
 
-	err := row.Scan(&c.ID, &c.Name, &c.Number, &c.Owner, &c.CVV, c.Date, c.CreatedTime, &c.User.ID)
+	err := row.Scan(&c.ID, &c.Name, &c.Number, &c.Owner, &c.CVV, c.Date, c.CreatedTime, &c.UserID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return c, card.ErrCardDoseNotExist

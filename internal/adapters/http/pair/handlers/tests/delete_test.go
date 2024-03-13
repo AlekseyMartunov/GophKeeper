@@ -30,58 +30,48 @@ func TestDelete(t *testing.T) {
 	mockPairService.EXPECT().Delete(c, "pair1", 1).Return(nil)
 
 	//===========================TEST 2===========================
-	// in test 2 handler return error before pairService called
-
-	//===========================TEST 3===========================
-	// in test 3 handler return error before pairService called
-
-	//===========================TEST 4===========================
 	mockPairService.EXPECT().Delete(c, "pair1", 1).Return(pairs.ErrPairNothingToDelete)
 
-	//===========================TEST 5===========================
+	//===========================TEST 3===========================
 	mockPairService.EXPECT().Delete(c, "pair1", 1).Return(errors.New("new error"))
+
+	//===========================TEST 4===========================
+	// in this test there is no call to the pairService
 
 	testCase := []struct {
 		name           string
-		body           string
 		statusCode     int
 		expectedBody   string
 		valueInContext string
+		urlKey         string
 	}{
 		{
 			name:           "test_1",
-			body:           `{"name":"pair1"}`,
 			statusCode:     http.StatusOK,
 			expectedBody:   `"ok"`,
 			valueInContext: "userID",
-		},
-		{
-			name:           "test_2",
-			body:           `"name":"pair1"}`,
-			statusCode:     http.StatusBadRequest,
-			expectedBody:   `"the request form is incorrect or the request does not contain the required field"`,
-			valueInContext: "userID",
+			urlKey:         "pair1",
 		},
 		{
 			name:           "test_3",
-			body:           `{"name":"pair1"}`,
-			statusCode:     http.StatusInternalServerError,
-			expectedBody:   `"internal server error"`,
-			valueInContext: "userNAME",
-		},
-		{
-			name:           "test_4",
-			body:           `{"name":"pair1"}`,
 			statusCode:     http.StatusNoContent,
 			expectedBody:   `"no content"`,
 			valueInContext: "userID",
+			urlKey:         "pair1",
 		},
 		{
-			name:           "test_5",
-			body:           `{"name":"pair1"}`,
+			name:           "test_3",
 			statusCode:     http.StatusInternalServerError,
 			expectedBody:   `"internal server error"`,
 			valueInContext: "userID",
+			urlKey:         "pair1",
+		},
+		{
+			name:           "test_4",
+			statusCode:     http.StatusInternalServerError,
+			expectedBody:   `"internal server error"`,
+			valueInContext: "ID_OF_USER",
+			urlKey:         "pair1",
 		},
 	}
 
@@ -92,12 +82,15 @@ func TestDelete(t *testing.T) {
 			req := httptest.NewRequest(
 				http.MethodPost,
 				"/someURL",
-				strings.NewReader(tc.body))
+				nil,
+			)
 
 			rec := httptest.NewRecorder()
 			ctx := e.NewContext(req, rec)
 
 			ctx.Set(tc.valueInContext, 1)
+			ctx.SetParamNames("name")
+			ctx.SetParamValues(tc.urlKey)
 
 			err := pairHandlers.Delete(ctx)
 			assert.NoError(t, err, "Error creating test request")

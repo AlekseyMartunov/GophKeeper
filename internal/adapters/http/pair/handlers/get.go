@@ -2,9 +2,7 @@ package pairhandlers
 
 import (
 	"GophKeeper/internal/entity/pairs"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -16,19 +14,9 @@ func (ph *PairHandler) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	b, err := io.ReadAll(c.Request().Body)
-	if err != nil {
-		ph.log.Error(err)
-		return c.JSON(http.StatusInternalServerError, internalServerError)
-	}
+	name := c.Param("name")
 
-	name := nameDTO{}
-
-	if err := json.Unmarshal(b, &name); err != nil {
-		return c.JSON(http.StatusBadRequest, requestParsingError)
-	}
-
-	pair, err := ph.service.Get(c.Request().Context(), name.Name, userID)
+	pair, err := ph.service.Get(c.Request().Context(), name, userID)
 	if err != nil {
 		if errors.Is(err, pairs.ErrPairDoseNotExist) {
 			return c.JSON(http.StatusNoContent, pairDoseNotExist)

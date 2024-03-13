@@ -24,7 +24,7 @@ func (ph *PairHandler) Save(c echo.Context) error {
 
 	dto := pairDTO{}
 
-	if err := json.Unmarshal(b, &dto); err != nil {
+	if err = json.Unmarshal(b, &dto); err != nil {
 		return c.JSON(http.StatusBadRequest, requestParsingError)
 	}
 	dto.UserID = userID

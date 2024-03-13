@@ -32,8 +32,8 @@ func NewCardControllerHTTP(h cardHandlers, l loggerMiddleware, a authMiddleware)
 }
 
 func (cc *CardControllerHTTP) Route(e *echo.Echo) {
-	e.POST("card/save", cc.handlers.Save, cc.logger.Logging, cc.auth.CheckAuth)
-	e.POST("card/get", cc.handlers.Get, cc.logger.Logging, cc.auth.CheckAuth)
-	e.POST("card/getall", cc.handlers.GetAll, cc.logger.Logging, cc.auth.CheckAuth)
-	e.DELETE("card/delete", cc.handlers.Delete, cc.logger.Logging, cc.auth.CheckAuth)
+	e.POST("card", cc.handlers.Save, cc.logger.Logging, cc.auth.CheckAuth)
+	e.GET("card/:name", cc.handlers.Get, cc.logger.Logging, cc.auth.CheckAuth)
+	e.GET("card", cc.handlers.GetAll, cc.logger.Logging, cc.auth.CheckAuth)
+	e.DELETE("card/:name", cc.handlers.Delete, cc.logger.Logging, cc.auth.CheckAuth)
 }

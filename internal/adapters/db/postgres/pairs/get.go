@@ -2,7 +2,6 @@ package pairsrepo
 
 import (
 	"GophKeeper/internal/entity/pairs"
-	"GophKeeper/internal/entity/users"
 	"context"
 	"errors"
 
@@ -15,10 +14,8 @@ func (ps *PairStorage) Get(ctx context.Context, pairName string, userID int) (pa
 
 	row := ps.conn.QueryRow(ctx, query, pairName, userID)
 	var p pairs.Pair
-	var u users.User
-	p.User = u
 
-	err := row.Scan(&p.ID, &p.Name, &p.Password, &p.Login, &p.CreatedTime, &p.User.ID)
+	err := row.Scan(&p.ID, &p.Name, &p.Password, &p.Login, &p.CreatedTime, &p.UserID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return p, pairs.ErrPairDoseNotExist

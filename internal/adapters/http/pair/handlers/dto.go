@@ -10,8 +10,8 @@ type nameDTO struct {
 }
 
 type pairDTO struct {
-	Login       string    `json:"login"`
-	Password    string    `json:"password"`
+	Login       string    `json:"login,omitempty"`
+	Password    string    `json:"password,omitempty"`
 	Name        string    `json:"name"`
 	UserID      int       `json:"-"`
 	CreatedTime time.Time `json:"created_time,omitempty"`
@@ -37,8 +37,6 @@ func arrDTO(p []pairs.Pair) []pairDTO {
 	res := make([]pairDTO, len(p))
 	for ind, val := range p {
 		res[ind].Name = val.Name
-		res[ind].Login = val.Login
-		res[ind].Password = val.Password
 		res[ind].CreatedTime = val.CreatedTime
 	}
 	return res

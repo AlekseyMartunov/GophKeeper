@@ -144,16 +144,10 @@ func (suite *dataBaseSuite) TestGetAllPairs() {
 
 	wanted := []pairs.Pair{
 		{
-			Name:     "pair2",
-			Login:    "bbb",
-			Password: "BBB",
-			UserID:   2,
+			Name: "pair2",
 		},
 		{
-			Name:     "pair3",
-			Login:    "ccc",
-			Password: "CCC",
-			UserID:   2,
+			Name: "pair3",
 		},
 	}
 
@@ -163,8 +157,6 @@ func (suite *dataBaseSuite) TestGetAllPairs() {
 
 	for i, w := range wanted {
 		assert.Equal(suite.T(), w.Name, result[i].Name)
-		assert.Equal(suite.T(), w.Login, result[i].Login)
-		assert.Equal(suite.T(), w.Password, result[i].Password)
 		assert.Equal(suite.T(), w.UserID, result[i].UserID)
 	}
 

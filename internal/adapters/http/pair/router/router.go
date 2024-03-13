@@ -32,8 +32,8 @@ func NewPairControllerHTTP(h pairHandlers, l loggerMiddleware, a authMiddleware)
 }
 
 func (pc *PairControllerHTTP) Route(e *echo.Echo) {
-	e.POST("pairs/save", pc.handlers.Save, pc.auth.CheckAuth, pc.logger.Logging)
-	e.POST("pairs/get", pc.handlers.Get, pc.auth.CheckAuth, pc.logger.Logging)
-	e.POST("pairs/getall", pc.handlers.GetAll, pc.auth.CheckAuth, pc.logger.Logging)
-	e.DELETE("pairs/delete", pc.handlers.Delete, pc.auth.CheckAuth, pc.logger.Logging)
+	e.POST("pairs", pc.handlers.Save, pc.auth.CheckAuth, pc.logger.Logging)
+	e.GET("pairs/:name", pc.handlers.Get, pc.auth.CheckAuth, pc.logger.Logging)
+	e.GET("pairs", pc.handlers.GetAll, pc.auth.CheckAuth, pc.logger.Logging)
+	e.DELETE("pairs/:name", pc.handlers.Delete, pc.auth.CheckAuth, pc.logger.Logging)
 }

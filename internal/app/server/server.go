@@ -7,7 +7,7 @@ import (
 	tokenRepo "GophKeeper/internal/adapters/db/postgres/token"
 	usersRepo "GophKeeper/internal/adapters/db/postgres/users"
 	cardHandlers "GophKeeper/internal/adapters/http/cards/handlers"
-	"GophKeeper/internal/adapters/http/cards/router"
+	cardRouter "GophKeeper/internal/adapters/http/cards/router"
 	pairHandlers "GophKeeper/internal/adapters/http/pair/handlers"
 	pairRouter "GophKeeper/internal/adapters/http/pair/router"
 	userHandlers "GophKeeper/internal/adapters/http/users/handlers"
@@ -66,7 +66,7 @@ func Run(ctx context.Context) error {
 	cardStorage := cardsRepo.NewCardStorage(pool)
 	cardService := cardService.NewCardService(cardStorage)
 	cardHandler := cardHandlers.NewCardHandler(log, cardService)
-	cardRouter := cardrouter.NewCardControllerHTTP(cardHandler, middlewareHTTPLogin, middlewareHTTPAuth)
+	cardRouter := cardRouter.NewCardControllerHTTP(cardHandler, middlewareHTTPLogin, middlewareHTTPAuth)
 
 	e := echo.New()
 	userRouter.Route(e)

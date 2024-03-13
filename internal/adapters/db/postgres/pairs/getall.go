@@ -6,7 +6,7 @@ import (
 )
 
 func (ps *PairStorage) GetAll(ctx context.Context, userID int) ([]pairs.Pair, error) {
-	query := `SELECT pair_id, pair_name, password, login, created_time, fk_user_id FROM pairs 
+	query := `SELECT pair_name, created_time FROM pairs 
 			  WHERE fk_user_id = $1`
 
 	rows, err := ps.conn.Query(ctx, query, userID)
@@ -18,7 +18,7 @@ func (ps *PairStorage) GetAll(ctx context.Context, userID int) ([]pairs.Pair, er
 	for rows.Next() {
 		p := pairs.Pair{}
 
-		err = rows.Scan(&p.ID, &p.Name, &p.Password, &p.Login, &p.CreatedTime, &p.UserID)
+		err = rows.Scan(&p.Name, &p.CreatedTime)
 		if err != nil {
 			return nil, err
 		}

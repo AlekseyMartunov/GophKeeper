@@ -36,14 +36,10 @@ func TestGetAll(t *testing.T) {
 	p1 := []pairs.Pair{
 		{
 			Name:        "pair for example.com1",
-			Login:       "log",
-			Password:    "pass",
 			CreatedTime: timeForTest,
 		},
 		{
 			Name:        "pair for example.com2",
-			Login:       "log2",
-			Password:    "pass2",
 			CreatedTime: timeForTest,
 		},
 	}
@@ -69,7 +65,7 @@ func TestGetAll(t *testing.T) {
 			name:           "test_1",
 			body:           ``,
 			statusCode:     http.StatusOK,
-			expectedBody:   `[{"login":"log","password":"pass","name":"pair for example.com1","created_time":"2022-09-09T12:45:00Z"},{"login":"log2","password":"pass2","name":"pair for example.com2","created_time":"2022-09-09T12:45:00Z"}]`,
+			expectedBody:   `[{"name":"pair for example.com1","created_time":"2022-09-09T12:45:00Z"},{"name":"pair for example.com2","created_time":"2022-09-09T12:45:00Z"}]`,
 			valueInContext: "userID",
 		},
 		{
