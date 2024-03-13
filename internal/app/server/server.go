@@ -1,16 +1,24 @@
 package server
 
 import (
+	cardsRepo "GophKeeper/internal/adapters/db/postgres/card"
 	"GophKeeper/internal/adapters/db/postgres/migration"
 	pairsRepo "GophKeeper/internal/adapters/db/postgres/pairs"
+	tokenRepo "GophKeeper/internal/adapters/db/postgres/token"
 	usersRepo "GophKeeper/internal/adapters/db/postgres/users"
+	cardHandlers "GophKeeper/internal/adapters/http/cards/handlers"
+	"GophKeeper/internal/adapters/http/cards/router"
+	pairHandlers "GophKeeper/internal/adapters/http/pair/handlers"
+	pairRouter "GophKeeper/internal/adapters/http/pair/router"
 	userHandlers "GophKeeper/internal/adapters/http/users/handlers"
 	userRouter "GophKeeper/internal/adapters/http/users/router"
 	"GophKeeper/internal/config"
 	"GophKeeper/internal/hasher"
 	"GophKeeper/internal/jwt"
 	"GophKeeper/internal/logger"
+	"GophKeeper/internal/middleware/authenticationhttp"
 	middlewareHTTPLogin "GophKeeper/internal/middleware/loginhttp"
+	cardService "GophKeeper/internal/usecase/creditcard"
 	pairService "GophKeeper/internal/usecase/pairs"
 	usersService "GophKeeper/internal/usecase/users"
 	"context"
@@ -36,10 +44,14 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("pool creation err: %w", err)
 	}
 
-	token := jwt.NewTokenManager(tokenExpTime, cfg.SecretKey())
+	tokenRepo := tokenRepo.NewTokenStorage(pool)
+	token := jwt.NewTokenManager(tokenExpTime, cfg.SecretKey(), tokenRepo)
+
 	hash := hasher.NewHasher(cfg.Salt())
 	log := logger.NewLogger()
+
 	middlewareHTTPLogin := middlewareHTTPLogin.NewLoggerMiddleware(log)
+	middlewareHTTPAuth := authenticationhttp.NewAuthMiddleware(token, log)
 
 	userStorage := usersRepo.NewUserStorage(pool)
 	userService := usersService.NewUserService(userStorage, hash)
@@ -48,11 +60,18 @@ func Run(ctx context.Context) error {
 
 	pairStorage := pairsRepo.NewPairsStorage(pool)
 	pairService := pairService.NewPairService(pairStorage)
+	pairHandler := pairHandlers.NewPairHandler(log, pairService)
+	pairRouter := pairRouter.NewPairControllerHTTP(pairHandler, middlewareHTTPLogin, middlewareHTTPAuth)
 
-	fmt.Println(pairService)
+	cardStorage := cardsRepo.NewCardStorage(pool)
+	cardService := cardService.NewCardService(cardStorage)
+	cardHandler := cardHandlers.NewCardHandler(log, cardService)
+	cardRouter := cardrouter.NewCardControllerHTTP(cardHandler, middlewareHTTPLogin, middlewareHTTPAuth)
 
 	e := echo.New()
 	userRouter.Route(e)
+	pairRouter.Route(e)
+	cardRouter.Route(e)
 
 	srv := http.Server{
 		Addr:    cfg.RunAddr(),

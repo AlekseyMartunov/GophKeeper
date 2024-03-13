@@ -1,10 +1,12 @@
 package authenticationhttp
 
 import (
-	"GophKeeper/internal/jwt"
+	"context"
 	"errors"
 	"net/http"
 	"strings"
+
+	"GophKeeper/internal/jwt"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,7 +23,7 @@ type logger interface {
 }
 
 type tokenManager interface {
-	GetUserID(tokenString string) (string, error)
+	GetUserID(ctx context.Context, tokenString string) (int, error)
 }
 
 type AuthMiddleware struct {
@@ -42,9 +44,12 @@ func (a *AuthMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		if token == "" {
 			return echo.NewHTTPError(http.StatusUnauthorized, jwt.ErrInvalidToken)
 		}
-		token = strings.Split(token, " ")[1]
+		token, err := splitToken(token)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, invalidToken)
+		}
 
-		userID, err := a.tokenManager.GetUserID(token)
+		userID, err := a.tokenManager.GetUserID(c.Request().Context(), token)
 		if err != nil {
 			a.logger.Error(err)
 			if errors.Is(err, jwt.ErrInvalidToken) {
@@ -57,7 +62,7 @@ func (a *AuthMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, internalServerError)
 		}
 
-		c.Set("externalUserID", userID)
+		c.Set("UserID", userID)
 		return next(c)
 	}
 }

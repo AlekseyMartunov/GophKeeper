@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"context"
 	"crypto/md5"
 	"errors"
 	"fmt"
@@ -11,9 +12,14 @@ import (
 var ErrInvalidToken = errors.New("invalid token")
 var ErrExpiredToken = errors.New("token is expired")
 
+type tokenService interface {
+	GetUserIDByExternalID(ctx context.Context, externalID string) (int, error)
+}
+
 type TokenManager struct {
 	tokenTTL  time.Duration
 	secretKey []byte
+	service   tokenService
 }
 
 type Claims struct {
@@ -21,13 +27,14 @@ type Claims struct {
 	ID string
 }
 
-func NewTokenManager(exp time.Duration, secretKey string) *TokenManager {
+func NewTokenManager(exp time.Duration, secretKey string, service tokenService) *TokenManager {
 	hasher := md5.New()
 	hasher.Write([]byte(secretKey))
 
 	return &TokenManager{
 		tokenTTL:  exp,
 		secretKey: hasher.Sum(nil),
+		service:   service,
 	}
 }
 
@@ -47,7 +54,7 @@ func (t *TokenManager) CreateToken(ID string) (string, error) {
 	return tokenString, nil
 }
 
-func (t *TokenManager) GetUserID(tokenString string) (string, error) {
+func (t *TokenManager) GetUserID(ctx context.Context, tokenString string) (int, error) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -59,14 +66,17 @@ func (t *TokenManager) GetUserID(tokenString string) (string, error) {
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return "", ErrExpiredToken
+			return 0, ErrExpiredToken
 		}
-		return "", ErrInvalidToken
+		return 0, ErrInvalidToken
 	}
 
 	if !token.Valid {
-		return "", ErrInvalidToken
+		return 0, ErrInvalidToken
 	}
-
-	return claims.ID, nil
+	id, err := t.service.GetUserIDByExternalID(ctx, claims.ID)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
