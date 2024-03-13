@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS cards (
     card_date VARCHAR (4) NOT NULL,
     created_time TIMESTAMP NOT NULL,
     fk_user_id INTEGER REFERENCES users(user_id) NOT NULL,
-    UNIQUE (pair_name, fk_user_id)
+    UNIQUE (card_name, fk_user_id)
     );

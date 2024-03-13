@@ -1,15 +1,14 @@
 package main
 
 import (
+	"GophKeeper/internal/app/server"
 	"context"
-
-	"GophKeeper/internal/server/app"
 )
 
 func main() {
 	ctx := context.Background()
 
-	err := app.Run(ctx)
+	err := server.Run(ctx)
 	if err != nil {
 		panic(err)
 	}
