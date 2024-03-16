@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"GophKeeper/internal/jwt"
+	tokenPackage "GophKeeper/internal/entity/token"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,6 +15,8 @@ const (
 	internalServerError = "internal server error"
 	invalidToken        = "your token is invalid"
 	expireToken         = "token has expired"
+	tokenIsBlocked      = "token is blocked"
+	noTokenFound        = "no such token exists"
 )
 
 type logger interface {
@@ -22,64 +24,83 @@ type logger interface {
 	Error(e error)
 }
 
-type tokenManager interface {
-	GetUserID(ctx context.Context, tokenString string) (int, error)
+type tokenService interface {
+	GetTokenInfo(ctx context.Context, t string) (tokenPackage.Token, error)
+	GetExternalUserID(token string) (string, error)
 }
 
 type AuthMiddleware struct {
-	tokenManager tokenManager
+	tokenService tokenService
 	logger       logger
 }
 
-func NewAuthMiddleware(t tokenManager, l logger) *AuthMiddleware {
+func NewAuthMiddleware(l logger, t tokenService) *AuthMiddleware {
 	return &AuthMiddleware{
 		logger:       l,
-		tokenManager: t,
+		tokenService: t,
 	}
 }
 
 func (a *AuthMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		token := c.Request().Header.Get("Authorization")
-		if token == "" {
-			return echo.NewHTTPError(http.StatusUnauthorized, jwt.ErrInvalidToken)
-		}
-		token, err := splitToken(token)
+		tokenString := c.Request().Header.Get("Authorization")
+
+		tokenString, err := splitToken(tokenString)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusUnauthorized, invalidToken)
 		}
 
-		userID, err := a.tokenManager.GetUserID(c.Request().Context(), token)
+		tokenEntity, err := a.tokenService.GetTokenInfo(c.Request().Context(), tokenString)
 		if err != nil {
-			a.logger.Error(err)
-			if errors.Is(err, jwt.ErrInvalidToken) {
-				return echo.NewHTTPError(http.StatusUnauthorized, invalidToken)
+			if errors.Is(err, tokenPackage.ErrNoTokenFound) {
+				return echo.NewHTTPError(http.StatusUnauthorized, noTokenFound)
 			}
 
-			if errors.Is(err, jwt.ErrExpiredToken) {
-				return echo.NewHTTPError(http.StatusUnauthorized, expireToken)
-			}
 			return echo.NewHTTPError(http.StatusInternalServerError, internalServerError)
 		}
 
-		c.Set("UserID", userID)
+		if tokenEntity.IsBlocked {
+			return echo.NewHTTPError(http.StatusUnauthorized, tokenIsBlocked)
+		}
+
+		externalUserID, err := a.tokenService.GetExternalUserID(tokenString)
+		if err != nil {
+			if errors.Is(err, tokenPackage.ErrTokenIsInvalid) {
+				return echo.NewHTTPError(http.StatusUnauthorized, invalidToken)
+			}
+
+			if errors.Is(err, tokenPackage.ErrTokenIsExpired) {
+				return echo.NewHTTPError(http.StatusUnauthorized, expireToken)
+			}
+
+			return echo.NewHTTPError(http.StatusUnauthorized, invalidToken)
+		}
+		if tokenEntity.ExternalUserID != externalUserID {
+			return echo.NewHTTPError(http.StatusUnauthorized, invalidToken)
+		}
+
+		c.Set("userID", tokenEntity.InternalUserID)
 		return next(c)
 	}
 }
 
 func splitToken(token string) (string, error) {
+	if token == "" {
+		return "", tokenPackage.ErrTokenIsInvalid
+	}
+
 	arr := strings.Split(token, " ")
-	if len(arr) != 3 {
-		return "", jwt.ErrInvalidToken
+	if len(arr) != 2 {
+		return "", tokenPackage.ErrTokenIsInvalid
 	}
 
-	if arr[1] != "Bearer" {
-		return "", jwt.ErrInvalidToken
+	if arr[0] != "Bearer" {
+		return "", tokenPackage.ErrTokenIsInvalid
 	}
 
-	if strings.Count(arr[2], ".") != 2 {
-		return "", jwt.ErrInvalidToken
+	if strings.Count(arr[1], ".") != 2 {
+		return "", tokenPackage.ErrTokenIsInvalid
 	}
 
-	return arr[2], nil
+	return arr[1], nil
 }

@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/context"
 	"testing"
 	"time"
 )
@@ -15,14 +16,14 @@ func TestCreatingToken(t *testing.T) {
 	assert.NoError(t, err,
 		"Error creating token")
 
-	idFromToken, err := manager.GetUserID(token)
+	idFromToken, err := manager.GetExternalUserID(context.Background(), token)
 	assert.NoError(t, err,
 		"Error parsing token")
 
 	assert.Equal(t, id, idFromToken,
 		"id dose not math with original id")
 
-	_, err = manager.GetUserID(token[:len(token)-4])
+	_, err = manager.GetExternalUserID(context.Background(), token[:len(token)-4])
 	assert.Equal(t, err, ErrInvalidToken,
 		"token manager dose not return invalidTokenError")
 
@@ -36,6 +37,6 @@ func TestTimeToLeaveToken(t *testing.T) {
 
 	time.Sleep(time.Second * 2)
 
-	_, err = manager.GetUserID(token)
+	_, err = manager.GetExternalUserID(context.Background(), token)
 	assert.Equal(t, err, ErrExpiredToken)
 }

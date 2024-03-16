@@ -20,6 +20,7 @@ import (
 	middlewareHTTPLogin "GophKeeper/internal/middleware/loginhttp"
 	cardService "GophKeeper/internal/usecase/creditcard"
 	pairService "GophKeeper/internal/usecase/pairs"
+	tokenService "GophKeeper/internal/usecase/token"
 	usersService "GophKeeper/internal/usecase/users"
 	"context"
 	"fmt"
@@ -44,18 +45,19 @@ func Run(ctx context.Context) error {
 		return fmt.Errorf("pool creation err: %w", err)
 	}
 
-	tokenRepo := tokenRepo.NewTokenStorage(pool)
-	token := jwt.NewTokenManager(tokenExpTime, cfg.SecretKey(), tokenRepo)
-
 	hash := hasher.NewHasher(cfg.Salt())
 	log := logger.NewLogger()
 
+	tokenRepo := tokenRepo.NewTokenStorage(pool)
+	tokenManager := jwt.NewTokenManager(tokenExpTime, cfg.SecretKey())
+	tokenService := tokenService.NewTokenService(tokenRepo, hash, tokenManager, cfg)
+
 	middlewareHTTPLogin := middlewareHTTPLogin.NewLoggerMiddleware(log)
-	middlewareHTTPAuth := authenticationhttp.NewAuthMiddleware(token, log)
+	middlewareHTTPAuth := authenticationhttp.NewAuthMiddleware(log, tokenService)
 
 	userStorage := usersRepo.NewUserStorage(pool)
 	userService := usersService.NewUserService(userStorage, hash)
-	userHandler := userHandlers.NewUserHandler(userService, log, token)
+	userHandler := userHandlers.NewUserHandler(userService, log, tokenService)
 	userRouter := userRouter.NewUserControllerHTTP(userHandler, middlewareHTTPLogin)
 
 	pairStorage := pairsRepo.NewPairsStorage(pool)

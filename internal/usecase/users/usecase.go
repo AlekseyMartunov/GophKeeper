@@ -7,11 +7,12 @@ import (
 
 type userRepo interface {
 	Save(ctx context.Context, user users.User) error
-	GetExternalID(ctx context.Context, user users.User) (string, error)
+	GetUserInfo(ctx context.Context, login, password string) (users.User, error)
+	GetInternalUserID(ctx context.Context, ExternalID string) (int, error)
 }
 
 type hasher interface {
-	Hash(value, key string) string
+	Hash(value, salt string) string
 }
 
 type UserService struct {
@@ -32,8 +33,11 @@ func (us *UserService) Save(ctx context.Context, user users.User) error {
 	return err
 }
 
-func (us *UserService) GetExternalID(ctx context.Context, user users.User) (string, error) {
-	user.Password = us.hasher.Hash(user.Password, user.Login)
-	ID, err := us.repo.GetExternalID(ctx, user)
-	return ID, err
+func (us *UserService) GetUserInfo(ctx context.Context, login, password string) (users.User, error) {
+	password = us.hasher.Hash(password, login)
+	return us.repo.GetUserInfo(ctx, login, password)
+}
+
+func (us *UserService) GetInternalUserID(ctx context.Context, ExternalID string) (int, error) {
+	return us.repo.GetInternalUserID(ctx, ExternalID)
 }

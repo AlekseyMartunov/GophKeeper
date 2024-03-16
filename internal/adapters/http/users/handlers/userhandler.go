@@ -8,12 +8,12 @@ import (
 //go:generate mockgen -source=handlers/handler.go -destination=tests/mock/mock.go
 
 type userService interface {
-	GetExternalID(ctx context.Context, user users.User) (string, error)
+	GetUserInfo(ctx context.Context, login, password string) (users.User, error)
 	Save(ctx context.Context, user users.User) error
 }
 
-type tokenJWTManager interface {
-	CreateToken(ID string) (string, error)
+type tokenService interface {
+	CreateAndSave(ctx context.Context, user users.User, tokenName string) (string, error)
 }
 
 type logger interface {
@@ -22,15 +22,15 @@ type logger interface {
 }
 
 type UserHandler struct {
-	service userService
-	log     logger
-	jwt     tokenJWTManager
+	service      userService
+	log          logger
+	tokenService tokenService
 }
 
-func NewUserHandler(s userService, l logger, t tokenJWTManager) *UserHandler {
+func NewUserHandler(s userService, l logger, t tokenService) *UserHandler {
 	return &UserHandler{
-		service: s,
-		log:     l,
-		jwt:     t,
+		service:      s,
+		log:          l,
+		tokenService: t,
 	}
 }

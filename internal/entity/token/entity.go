@@ -10,6 +10,7 @@ var (
 	ErrTokenAlreadyExists = errors.New("token already exist")
 	ErrTokenIsInvalid     = errors.New("invalid token")
 	ErrTokenIsBlocked     = errors.New("token blocked")
+	ErrNoTokenFound       = errors.New("no such token exists")
 )
 
 type Token struct {
@@ -17,8 +18,7 @@ type Token struct {
 	Name           string
 	Token          string
 	ExternalUserID string
-	UserID         int
+	InternalUserID int
 	IsBlocked      bool
-	ExpireTime     time.Time
 	CreatedTime    time.Time
 }

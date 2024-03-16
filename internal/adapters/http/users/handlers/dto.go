@@ -5,13 +5,18 @@ import (
 )
 
 type userDTO struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	UserLogin    string `json:"login"`
+	UserPassword string `json:"password"`
+	NameForToken string `json:"name,omitempty"`
+}
+
+type tokenDTO struct {
+	Token string `json:"token"`
 }
 
 func (dto *userDTO) ToEntity() users.User {
 	return users.User{
-		Login:    dto.Login,
-		Password: dto.Password,
+		Login:    dto.UserLogin,
+		Password: dto.UserPassword,
 	}
 }
