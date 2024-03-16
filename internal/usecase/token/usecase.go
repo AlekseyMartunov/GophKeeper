@@ -13,7 +13,7 @@ type config interface {
 
 type storage interface {
 	SaveToken(ctx context.Context, t token.Token) error
-	BlockToken(ctx context.Context, token string) error
+	LockToken(ctx context.Context, token string, status bool) error
 	GetTokenInfo(ctx context.Context, t string) (token.Token, error)
 }
 
@@ -65,12 +65,19 @@ func (ts *TokenService) CreateAndSave(ctx context.Context, u users.User, tokenNa
 }
 
 func (ts *TokenService) GetTokenInfo(ctx context.Context, t string) (token.Token, error) {
-	return ts.repo.GetTokenInfo(ctx, t)
+	return ts.repo.GetTokenInfo(ctx, ts.hasher.Hash(t, ts.cfg.Salt()))
 }
 
-func (ts *TokenService) BlockToken(ctx context.Context, token string) error {
-	hasToken := ts.hasher.Hash(token, ts.cfg.Salt())
-	return ts.repo.BlockToken(ctx, hasToken)
+func (ts *TokenService) LockToken(ctx context.Context, tokenString string, status bool, userID int) error {
+	t, err := ts.GetTokenInfo(ctx, tokenString)
+	if err != nil {
+		return err
+	}
+	if t.InternalUserID != userID {
+		return token.ErrNoTokenFound
+	}
+	hasToken := ts.hasher.Hash(tokenString, ts.cfg.Salt())
+	return ts.repo.LockToken(ctx, hasToken, status)
 }
 
 func (ts *TokenService) GetExternalUserID(token string) (string, error) {

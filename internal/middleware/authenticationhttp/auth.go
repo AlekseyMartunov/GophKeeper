@@ -65,6 +65,7 @@ func (a *AuthMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 
 		externalUserID, err := a.tokenService.GetExternalUserID(tokenString)
 		if err != nil {
+
 			if errors.Is(err, tokenPackage.ErrTokenIsInvalid) {
 				return echo.NewHTTPError(http.StatusUnauthorized, invalidToken)
 			}

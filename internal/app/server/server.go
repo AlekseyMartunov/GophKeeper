@@ -10,6 +10,8 @@ import (
 	cardRouter "GophKeeper/internal/adapters/http/cards/router"
 	pairHandlers "GophKeeper/internal/adapters/http/pair/handlers"
 	pairRouter "GophKeeper/internal/adapters/http/pair/router"
+	tokenHandlers "GophKeeper/internal/adapters/http/tokens/handlers"
+	tokenRouter "GophKeeper/internal/adapters/http/tokens/router"
 	userHandlers "GophKeeper/internal/adapters/http/users/handlers"
 	userRouter "GophKeeper/internal/adapters/http/users/router"
 	"GophKeeper/internal/config"
@@ -55,6 +57,9 @@ func Run(ctx context.Context) error {
 	middlewareHTTPLogin := middlewareHTTPLogin.NewLoggerMiddleware(log)
 	middlewareHTTPAuth := authenticationhttp.NewAuthMiddleware(log, tokenService)
 
+	tokenHandler := tokenHandlers.NewTokenHandler(log, tokenService)
+	tokenRouter := tokenRouter.NewTokenControllerHTTP(tokenHandler, middlewareHTTPLogin, middlewareHTTPAuth)
+
 	userStorage := usersRepo.NewUserStorage(pool)
 	userService := usersService.NewUserService(userStorage, hash)
 	userHandler := userHandlers.NewUserHandler(userService, log, tokenService)
@@ -74,6 +79,7 @@ func Run(ctx context.Context) error {
 	userRouter.Route(e)
 	pairRouter.Route(e)
 	cardRouter.Route(e)
+	tokenRouter.Route(e)
 
 	srv := http.Server{
 		Addr:    cfg.RunAddr(),

@@ -5,10 +5,10 @@ import (
 	"context"
 )
 
-func (ts *TokenStorage) BlockToken(ctx context.Context, t string) error {
-	query := `UPDATE tokens SET is_blocked = TRUE WHERE token = $1`
+func (ts *TokenStorage) LockToken(ctx context.Context, t string, status bool) error {
+	query := `UPDATE tokens SET is_blocked = $1 WHERE token = $2`
 
-	tag, err := ts.pool.Exec(ctx, query, t)
+	tag, err := ts.pool.Exec(ctx, query, status, t)
 	if err != nil {
 		return err
 	}
@@ -18,5 +18,4 @@ func (ts *TokenStorage) BlockToken(ctx context.Context, t string) error {
 	}
 
 	return nil
-
 }
