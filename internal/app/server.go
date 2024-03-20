@@ -1,4 +1,4 @@
-package server
+package app
 
 import (
 	cardsRepo "GophKeeper/internal/adapters/db/postgres/card"
