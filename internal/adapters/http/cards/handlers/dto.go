@@ -11,11 +11,11 @@ type cardName struct {
 
 type cardDTO struct {
 	CardName    string    `json:"card_name"`
-	Number      int       `json:"number"`
+	Number      string    `json:"number"`
 	Owner       string    `json:"owner"`
-	Date        time.Time `json:"date"`
+	Date        string    `json:"date"`
 	CreatedTime time.Time `json:"created_time"`
-	CVV         int       `json:"cvv"`
+	CVV         string    `json:"cvv"`
 	userID      int
 }
 

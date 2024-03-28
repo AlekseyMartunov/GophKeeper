@@ -15,7 +15,6 @@ func (ch *CardHandler) Get(c echo.Context) error {
 	}
 
 	name := c.Param("name")
-
 	res, err := ch.service.Get(c.Request().Context(), name, userID)
 	if err != nil {
 		if errors.Is(err, card.ErrCardDoseNotExist) {

@@ -18,7 +18,7 @@ func (cs *CardStorage) GetAll(ctx context.Context, userID int) ([]card.Card, err
 	for rows.Next() {
 		c := card.Card{}
 
-		err = rows.Scan(&c.Name, c.CreatedTime)
+		err = rows.Scan(&c.Name, &c.CreatedTime)
 		if err != nil {
 			return nil, err
 		}

@@ -12,10 +12,10 @@ var (
 )
 
 type Card struct {
-	Number int
+	Number string
 	Owner  string
-	Date   time.Time
-	CVV    int
+	Date   string
+	CVV    string
 
 	CreatedTime time.Time
 	UserID      int

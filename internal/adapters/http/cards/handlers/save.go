@@ -25,6 +25,7 @@ func (ch *CardHandler) Save(c echo.Context) error {
 	dto := cardDTO{}
 
 	if err := json.Unmarshal(b, &dto); err != nil {
+		ch.log.Error(err)
 		return c.JSON(http.StatusBadRequest, requestParsingError)
 	}
 	dto.userID = userID
@@ -34,6 +35,7 @@ func (ch *CardHandler) Save(c echo.Context) error {
 		if errors.Is(err, card.ErrCardAlreadyExists) {
 			return c.JSON(http.StatusConflict, cardAlreadyExists)
 		}
+		ch.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 	return c.JSON(http.StatusOK, messageOk)

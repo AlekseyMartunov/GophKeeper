@@ -15,7 +15,6 @@ func (ph *PairHandler) Get(c echo.Context) error {
 	}
 
 	name := c.Param("name")
-
 	pair, err := ph.service.Get(c.Request().Context(), name, userID)
 	if err != nil {
 		if errors.Is(err, pairs.ErrPairDoseNotExist) {
