@@ -1,16 +1,13 @@
-package cardhandlers
+package filehandlers
 
 import (
-	"GophKeeper/internal/entity/card"
 	"encoding/json"
-	"errors"
+	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 )
 
-func (ch *CardHandler) Save(c echo.Context) error {
+func (fh *FileHandler) Save(c echo.Context) error {
 	userID, ok := c.Get("userID").(int)
 	if !ok {
 		return c.JSON(http.StatusInternalServerError, internalServerError)
@@ -18,26 +15,22 @@ func (ch *CardHandler) Save(c echo.Context) error {
 
 	b, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		ch.log.Error(err)
+		fh.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	dto := cardDTO{}
-
-	if err = json.Unmarshal(b, &dto); err != nil {
-		ch.log.Error(err)
-		return c.JSON(http.StatusBadRequest, requestParsingError)
-	}
+	dto := fileDTO{}
 	dto.userID = userID
 
-	err = ch.service.Save(c.Request().Context(), dto.toEntity())
+	if err = json.Unmarshal(b, &dto); err != nil {
+		fh.log.Error(err)
+		return c.JSON(http.StatusBadRequest, requestParsingError)
+	}
+
+	err = fh.service.Save(c.Request().Context(), dto.ToEntity())
 	if err != nil {
-		if errors.Is(err, card.ErrCardAlreadyExists) {
-			return c.JSON(http.StatusConflict, cardAlreadyExists)
-		}
-		ch.log.Error(err)
+		fh.log.Error(err)
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
-	return c.JSON(http.StatusOK, messageOk)
-
+	return nil
 }

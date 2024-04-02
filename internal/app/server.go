@@ -1,6 +1,7 @@
 package app
 
 import (
+	fileStorage "GophKeeper/internal/adapters/db/minio/file"
 	cardsRepo "GophKeeper/internal/adapters/db/postgres/card"
 	"GophKeeper/internal/adapters/db/postgres/migration"
 	pairsRepo "GophKeeper/internal/adapters/db/postgres/pairs"
@@ -8,6 +9,8 @@ import (
 	usersRepo "GophKeeper/internal/adapters/db/postgres/users"
 	cardHandlers "GophKeeper/internal/adapters/http/cards/handlers"
 	cardRouter "GophKeeper/internal/adapters/http/cards/router"
+	fileHandlers "GophKeeper/internal/adapters/http/files/handlers"
+	"GophKeeper/internal/adapters/http/files/router"
 	pairHandlers "GophKeeper/internal/adapters/http/pair/handlers"
 	pairRouter "GophKeeper/internal/adapters/http/pair/router"
 	tokenHandlers "GophKeeper/internal/adapters/http/tokens/handlers"
@@ -19,6 +22,7 @@ import (
 	"GophKeeper/internal/middleware/authenticationhttp"
 	middlewareHTTPLogin "GophKeeper/internal/middleware/loginhttp"
 	cardService "GophKeeper/internal/usecase/creditcard"
+	fileService "GophKeeper/internal/usecase/file"
 	pairService "GophKeeper/internal/usecase/pairs"
 	tokenService "GophKeeper/internal/usecase/token"
 	usersService "GophKeeper/internal/usecase/users"
@@ -75,11 +79,21 @@ func Run(ctx context.Context) error {
 	cardHandler := cardHandlers.NewCardHandler(log, cardService)
 	cardRouter := cardRouter.NewCardControllerHTTP(cardHandler, middlewareHTTPLogin, middlewareHTTPAuth)
 
+	fileStorage, err := fileStorage.NewFileStorage(cfg)
+	if err != nil {
+		return err
+	}
+	fileService := fileService.NewFileService(fileStorage)
+	fileHandler := fileHandlers.NewFileHandler(log, fileService)
+	fileRouter := router.NewFileControllerHTTP(fileHandler, middlewareHTTPLogin, middlewareHTTPAuth)
+
 	e := echo.New()
+
 	userRouter.Route(e)
 	pairRouter.Route(e)
 	cardRouter.Route(e)
 	tokenRouter.Route(e)
+	fileRouter.Route(e)
 
 	srv := http.Server{
 		Addr:    cfg.RunAddr(),
