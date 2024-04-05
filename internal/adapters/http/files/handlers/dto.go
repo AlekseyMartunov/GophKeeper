@@ -7,7 +7,7 @@ import (
 
 type fileDTO struct {
 	Name        string    `json:"name"`
-	Data        []byte    `json:"data"`
+	Data        []byte    `json:"data,omitempty"`
 	CreatedTime time.Time `json:"created_time"`
 	userID      int
 }

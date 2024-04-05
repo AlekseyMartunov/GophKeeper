@@ -5,20 +5,18 @@ import (
 	"bytes"
 	"context"
 	"github.com/minio/minio-go/v7"
-	"strconv"
 	"time"
 )
 
 func (fs *FileStorage) Save(ctx context.Context, f *file.File) error {
-	bucketName := strconv.Itoa(f.UserID)
-	err := fs.createBucket(ctx, bucketName)
+	err := fs.createBucket(ctx, f.BucketName)
 	if err != nil {
 		return err
 	}
 
 	_, err = fs.client.PutObject(
 		ctx,
-		bucketName,
+		f.BucketName,
 		f.Name,
 		bytes.NewReader(f.Data),
 		int64(len(f.Data)),

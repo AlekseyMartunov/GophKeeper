@@ -5,7 +5,6 @@ import (
 	"context"
 	"github.com/minio/minio-go/v7"
 	"io"
-	"strconv"
 	"time"
 )
 
@@ -28,10 +27,6 @@ func (fs *FileStorage) Get(ctx context.Context, bucketName, fileName string) (*f
 		return nil, err
 	}
 
-	id, err := strconv.Atoi(bucketName)
-	if err != nil {
-		return nil, err
-	}
 
 	time, err := time.Parse(time.RFC3339, info.UserMetadata["Created_time"])
 	if err != nil {
@@ -42,7 +37,6 @@ func (fs *FileStorage) Get(ctx context.Context, bucketName, fileName string) (*f
 		Name:        fileName,
 		Data:        buff,
 		CreatedTime: time,
-		UserID:      id,
 	}
 
 	return &file, nil
