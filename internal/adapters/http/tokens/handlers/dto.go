@@ -4,6 +4,10 @@ type tokenDTO struct {
 	Token string `json: "token"`
 }
 
+type clientsDTO struct {
+	Clients []string `json:"clients"`
+}
+
 type tokenDeleteDTO struct {
 	TokenName string `json:"token_name"`
 }

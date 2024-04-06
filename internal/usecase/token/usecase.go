@@ -15,6 +15,7 @@ type storage interface {
 	SaveToken(ctx context.Context, t token.Token) error
 	LockToken(ctx context.Context, tokenName string, userID int, status bool) error
 	GetTokenInfo(ctx context.Context, t string) (token.Token, error)
+	GetAll(ctx context.Context, userID int) ([]string, error)
 }
 
 type tokenManager interface {
@@ -63,6 +64,10 @@ func (ts *TokenService) CreateAndSave(ctx context.Context, u users.User, ip, tok
 	}
 
 	return t, nil
+}
+
+func (ts *TokenService) GetAll(ctx context.Context, userID int) ([]string, error) {
+	return ts.repo.GetAll(ctx, userID)
 }
 
 func (ts *TokenService) GetTokenInfo(ctx context.Context, t string) (token.Token, error) {

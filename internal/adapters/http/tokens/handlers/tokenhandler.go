@@ -13,6 +13,7 @@ type logger interface {
 type tokenService interface {
 	LockToken(ctx context.Context, token string, userID int) error
 	CreateAndSave(ctx context.Context, u users.User, ip, tokenName string) (string, error)
+	GetAll(ctx context.Context, userID int) ([]string, error)
 }
 
 type userService interface {
