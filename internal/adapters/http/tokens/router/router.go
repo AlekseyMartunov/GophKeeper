@@ -4,6 +4,7 @@ import "github.com/labstack/echo/v4"
 
 type tokenHandlers interface {
 	Lock(c echo.Context) error
+	CreateToken(c echo.Context) error
 }
 
 type loggerMiddleware interface {
@@ -29,5 +30,6 @@ func NewTokenControllerHTTP(h tokenHandlers, l loggerMiddleware, a authMiddlewar
 }
 
 func (tk *TokenControllerHTTP) Route(e *echo.Echo) {
-	e.POST("token/lock", tk.handlers.Lock, tk.auth.CheckAuth, tk.log.Logging)
+	e.DELETE("token", tk.handlers.Lock, tk.auth.CheckAuth, tk.log.Logging)
+	e.POST("token", tk.handlers.CreateToken, tk.log.Logging)
 }

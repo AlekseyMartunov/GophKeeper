@@ -13,7 +13,7 @@ type config interface {
 
 type storage interface {
 	SaveToken(ctx context.Context, t token.Token) error
-	LockToken(ctx context.Context, token string, status bool) error
+	LockToken(ctx context.Context, tokenName string, userID int, status bool) error
 	GetTokenInfo(ctx context.Context, t string) (token.Token, error)
 }
 
@@ -41,7 +41,7 @@ func NewTokenService(s storage, h hasher, m tokenManager, c config) *TokenServic
 	}
 }
 
-func (ts *TokenService) CreateAndSave(ctx context.Context, u users.User, tokenName string) (string, error) {
+func (ts *TokenService) CreateAndSave(ctx context.Context, u users.User, ip, tokenName string) (string, error) {
 	t, err := ts.manager.CreateToken(u.ExternalID)
 	if err != nil {
 		return "", err
@@ -54,6 +54,7 @@ func (ts *TokenService) CreateAndSave(ctx context.Context, u users.User, tokenNa
 		ExternalUserID: u.ExternalID,
 		InternalUserID: u.ID,
 		IsBlocked:      false,
+		IpAddress:      ip,
 	}
 
 	err = ts.repo.SaveToken(ctx, tokenEntity)
@@ -68,18 +69,10 @@ func (ts *TokenService) GetTokenInfo(ctx context.Context, t string) (token.Token
 	return ts.repo.GetTokenInfo(ctx, ts.hasher.Hash(t, ts.cfg.Salt()))
 }
 
-func (ts *TokenService) LockToken(ctx context.Context, tokenString string, status bool, userID int) error {
-	t, err := ts.GetTokenInfo(ctx, tokenString)
-	if err != nil {
-		return err
-	}
-	if t.InternalUserID != userID {
-		return token.ErrNoTokenFound
-	}
-	hasToken := ts.hasher.Hash(tokenString, ts.cfg.Salt())
-	return ts.repo.LockToken(ctx, hasToken, status)
-}
-
 func (ts *TokenService) GetExternalUserID(token string) (string, error) {
 	return ts.manager.GetExternalUserID(token)
+}
+
+func (ts *TokenService) LockToken(ctx context.Context, tokenName string, userID int) error {
+	return ts.repo.LockToken(ctx, tokenName, userID, true)
 }

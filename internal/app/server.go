@@ -61,12 +61,9 @@ func Run(ctx context.Context) error {
 	middlewareHTTPLogin := middlewareHTTPLogin.NewLoggerMiddleware(log)
 	middlewareHTTPAuth := authenticationhttp.NewAuthMiddleware(log, tokenService)
 
-	tokenHandler := tokenHandlers.NewTokenHandler(log, tokenService)
-	tokenRouter := tokenRouter.NewTokenControllerHTTP(tokenHandler, middlewareHTTPLogin, middlewareHTTPAuth)
-
 	userStorage := usersRepo.NewUserStorage(pool)
 	userService := usersService.NewUserService(userStorage, hash)
-	userHandler := userHandlers.NewUserHandler(userService, log, tokenService)
+	userHandler := userHandlers.NewUserHandler(userService, log)
 	userRouter := userRouter.NewUserControllerHTTP(userHandler, middlewareHTTPLogin)
 
 	pairStorage := pairsRepo.NewPairsStorage(pool)
@@ -78,6 +75,9 @@ func Run(ctx context.Context) error {
 	cardService := cardService.NewCardService(cardStorage)
 	cardHandler := cardHandlers.NewCardHandler(log, cardService)
 	cardRouter := cardRouter.NewCardControllerHTTP(cardHandler, middlewareHTTPLogin, middlewareHTTPAuth)
+
+	tokenHandler := tokenHandlers.NewTokenHandler(log, tokenService, userService)
+	tokenRouter := tokenRouter.NewTokenControllerHTTP(tokenHandler, middlewareHTTPLogin, middlewareHTTPAuth)
 
 	fileStorage, err := fileStorage.NewFileStorage(cfg)
 	if err != nil {
@@ -103,6 +103,5 @@ func Run(ctx context.Context) error {
 	if err = srv.ListenAndServe(); err != http.ErrServerClosed {
 		return fmt.Errorf("listen and serve error: %w", err)
 	}
-
 	return nil
 }

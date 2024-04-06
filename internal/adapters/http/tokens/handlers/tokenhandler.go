@@ -1,6 +1,9 @@
 package tokenhandlers
 
-import "context"
+import (
+	"GophKeeper/internal/entity/users"
+	"context"
+)
 
 type logger interface {
 	Info(s string)
@@ -8,17 +11,24 @@ type logger interface {
 }
 
 type tokenService interface {
-	LockToken(ctx context.Context, token string, status bool, userID int) error
+	LockToken(ctx context.Context, token string, userID int) error
+	CreateAndSave(ctx context.Context, u users.User, ip, tokenName string) (string, error)
+}
+
+type userService interface {
+	GetUserInfo(ctx context.Context, login, password string) (users.User, error)
 }
 
 type TokenHandler struct {
-	service tokenService
-	log     logger
+	tokenService tokenService
+	userService  userService
+	log          logger
 }
 
-func NewTokenHandler(l logger, s tokenService) *TokenHandler {
+func NewTokenHandler(l logger, s tokenService, u userService) *TokenHandler {
 	return &TokenHandler{
-		service: s,
-		log:     l,
+		tokenService: s,
+		userService:  u,
+		log:          l,
 	}
 }

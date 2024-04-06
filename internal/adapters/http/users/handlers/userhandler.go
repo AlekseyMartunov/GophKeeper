@@ -12,25 +12,19 @@ type userService interface {
 	Save(ctx context.Context, user users.User) error
 }
 
-type tokenService interface {
-	CreateAndSave(ctx context.Context, user users.User, tokenName string) (string, error)
-}
-
 type logger interface {
 	Info(s string)
 	Error(e error)
 }
 
 type UserHandler struct {
-	service      userService
-	log          logger
-	tokenService tokenService
+	service userService
+	log     logger
 }
 
-func NewUserHandler(s userService, l logger, t tokenService) *UserHandler {
+func NewUserHandler(s userService, l logger) *UserHandler {
 	return &UserHandler{
-		service:      s,
-		log:          l,
-		tokenService: t,
+		service: s,
+		log:     l,
 	}
 }

@@ -21,4 +21,5 @@ type Token struct {
 	InternalUserID int
 	IsBlocked      bool
 	CreatedTime    time.Time
+	IpAddress      string
 }

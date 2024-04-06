@@ -21,14 +21,14 @@ func (th *TokenHandler) Lock(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, internalServerError)
 	}
 
-	dto := dtoToken{}
+	dto := tokenDeleteDTO{}
 
 	err = json.Unmarshal(b, &dto)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, requestParsingError)
 	}
 
-	err = th.service.LockToken(c.Request().Context(), dto.Token, dto.Status, userID)
+	err = th.tokenService.LockToken(c.Request().Context(), dto.TokenName, userID)
 	if err != nil {
 		if errors.Is(err, token.ErrNoTokenFound) {
 			return c.JSON(http.StatusNoContent, noToken)
