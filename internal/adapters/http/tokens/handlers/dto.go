@@ -15,5 +15,5 @@ type tokenDeleteDTO struct {
 type createTokenDTO struct {
 	Login     string `json:"login"`
 	Password  string `json:"password"`
-	TokenName string `json:"token_name"`
+	TokenName string `json:"name"`
 }

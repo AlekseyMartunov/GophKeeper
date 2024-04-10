@@ -3,10 +3,12 @@ package tokenrepo
 import (
 	"GophKeeper/internal/entity/token"
 	"context"
+	"fmt"
 )
 
 func (ts *TokenStorage) GetAll(ctx context.Context, userID int) ([]string, error) {
 	query := `SELECT token_name FROM tokens WHERE fk_user_id = $1`
+	fmt.Printf("get all token user id: %d", userID)
 
 	rows, err := ts.pool.Query(ctx, query, userID)
 	if err != nil {
