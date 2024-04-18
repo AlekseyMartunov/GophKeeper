@@ -1,7 +1,7 @@
 package userhandlers
 
 import (
-	"GophKeeper/app/internal/entity/users"
+	"GophKeeper/internal/entity/users"
 )
 
 type userDTO struct {

@@ -1,9 +1,10 @@
 package userhandlers
 
 import (
-	"GophKeeper/app/internal/entity/users"
+	"GophKeeper/internal/entity/users"
 	"encoding/json"
 	"errors"
+	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
 )

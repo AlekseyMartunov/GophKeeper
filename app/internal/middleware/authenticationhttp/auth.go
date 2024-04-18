@@ -1,9 +1,10 @@
 package authenticationhttp
 
 import (
-	tokenPackage "GophKeeper/app/internal/entity/token"
+	tokenPackage "GophKeeper/internal/entity/token"
 	"context"
 	"errors"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
 )
@@ -84,20 +85,20 @@ func (a *AuthMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 
 func splitToken(token string) (string, error) {
 	if token == "" {
-		return "", token.ErrTokenIsInvalid
+		return "", tokenPackage.ErrTokenIsInvalid
 	}
 
 	arr := strings.Split(token, " ")
 	if len(arr) != 2 {
-		return "", token.ErrTokenIsInvalid
+		return "", tokenPackage.ErrTokenIsInvalid
 	}
 
 	if arr[0] != "Bearer" {
-		return "", token.ErrTokenIsInvalid
+		return "", tokenPackage.ErrTokenIsInvalid
 	}
 
 	if strings.Count(arr[1], ".") != 2 {
-		return "", token.ErrTokenIsInvalid
+		return "", tokenPackage.ErrTokenIsInvalid
 	}
 
 	return arr[1], nil

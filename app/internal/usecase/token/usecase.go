@@ -1,8 +1,8 @@
 package tokenservice
 
 import (
-	"GophKeeper/app/internal/entity/token"
-	"GophKeeper/app/internal/entity/users"
+	"GophKeeper/internal/entity/token"
+	"GophKeeper/internal/entity/users"
 	"context"
 	"time"
 )

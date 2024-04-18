@@ -1,7 +1,7 @@
 package main
 
 import (
-	"app/internal/app"
+	"GophKeeper/internal/app"
 	"context"
 )
 

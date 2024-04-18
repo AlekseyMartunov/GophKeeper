@@ -1,9 +1,10 @@
 package usersrepo
 
 import (
-	"GophKeeper/app/internal/entity/users"
+	"GophKeeper/internal/entity/users"
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5"
 )
 
 func (us *UserStorage) GetInternalUserID(ctx context.Context, ExternalID string) (int, error) {

@@ -1,7 +1,7 @@
 package pairservice
 
 import (
-	"GophKeeper/app/internal/entity/pairs"
+	"GophKeeper/internal/entity/pairs"
 	"context"
 	"time"
 )

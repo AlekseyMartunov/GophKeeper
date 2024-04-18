@@ -1,9 +1,10 @@
 package filestorage
 
 import (
-	"GophKeeper/app/internal/entity/file"
+	"GophKeeper/internal/entity/file"
 	"bytes"
 	"context"
+	"github.com/minio/minio-go/v7"
 	"time"
 )
 

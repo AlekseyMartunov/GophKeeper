@@ -1,9 +1,10 @@
 package cardsrepo
 
 import (
-	"GophKeeper/app/internal/entity/card"
+	"GophKeeper/internal/entity/card"
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5"
 )
 
 func (cs *CardStorage) Get(ctx context.Context, cardName string, userID int) (card.Card, error) {

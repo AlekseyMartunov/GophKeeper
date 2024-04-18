@@ -1,7 +1,7 @@
 package pairsrepo
 
 import (
-	"GophKeeper/app/internal/entity/pairs"
+	"GophKeeper/internal/entity/pairs"
 	"context"
 )
 

@@ -1,7 +1,7 @@
 package usersservice
 
 import (
-	"GophKeeper/app/internal/entity/users"
+	"GophKeeper/internal/entity/users"
 	"context"
 )
 

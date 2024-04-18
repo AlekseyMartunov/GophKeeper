@@ -1,7 +1,7 @@
 package fileservice
 
 import (
-	"GophKeeper/app/internal/entity/file"
+	"GophKeeper/internal/entity/file"
 	"context"
 	"fmt"
 )

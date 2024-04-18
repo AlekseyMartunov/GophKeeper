@@ -1,8 +1,9 @@
 package pairhandlers
 
 import (
-	"GophKeeper/app/internal/entity/pairs"
+	"GophKeeper/internal/entity/pairs"
 	"errors"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 

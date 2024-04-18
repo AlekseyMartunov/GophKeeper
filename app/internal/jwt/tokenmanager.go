@@ -1,10 +1,11 @@
 package jwt
 
 import (
-	tokenEntity "GophKeeper/app/internal/entity/token"
+	tokenEntity "GophKeeper/internal/entity/token"
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
 

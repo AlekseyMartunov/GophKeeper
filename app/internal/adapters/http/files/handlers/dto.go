@@ -1,7 +1,7 @@
 package filehandlers
 
 import (
-	"GophKeeper/app/internal/entity/file"
+	"GophKeeper/internal/entity/file"
 	"time"
 )
 

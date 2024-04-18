@@ -1,7 +1,7 @@
 package pairhandlers
 
 import (
-	"GophKeeper/app/internal/entity/pairs"
+	"GophKeeper/internal/entity/pairs"
 	"time"
 )
 

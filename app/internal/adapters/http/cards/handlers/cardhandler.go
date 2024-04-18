@@ -1,7 +1,7 @@
 package cardhandlers
 
 import (
-	"GophKeeper/app/internal/entity/card"
+	"GophKeeper/internal/entity/card"
 	"context"
 )
 

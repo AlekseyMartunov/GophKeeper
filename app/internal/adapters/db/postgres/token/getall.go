@@ -1,7 +1,7 @@
 package tokenrepo
 
 import (
-	"GophKeeper/app/internal/entity/token"
+	"GophKeeper/internal/entity/token"
 	"context"
 	"fmt"
 )

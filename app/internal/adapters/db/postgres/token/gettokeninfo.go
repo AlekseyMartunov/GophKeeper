@@ -1,9 +1,10 @@
 package tokenrepo
 
 import (
-	"GophKeeper/app/internal/entity/token"
+	"GophKeeper/internal/entity/token"
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5"
 )
 
 func (ts *TokenStorage) GetTokenInfo(ctx context.Context, tokenString string) (token.Token, error) {

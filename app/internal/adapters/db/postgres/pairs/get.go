@@ -1,9 +1,10 @@
 package pairsrepo
 
 import (
-	"GophKeeper/app/internal/entity/pairs"
+	"GophKeeper/internal/entity/pairs"
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5"
 )
 
 func (ps *PairStorage) Get(ctx context.Context, pairName string, userID int) (pairs.Pair, error) {
