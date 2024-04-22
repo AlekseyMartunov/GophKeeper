@@ -43,7 +43,7 @@ func Run(ctx context.Context) error {
 	cfg := config.NewConfig()
 	cfg.ParseFlags()
 
-	err := migration.MigrationsUp(cfg.PostgresDSN())
+	err := migration.MigrationsUp(cfg)
 	if err != nil {
 		return fmt.Errorf("migration err: %w", err)
 	}
@@ -96,12 +96,11 @@ func Run(ctx context.Context) error {
 	cardRouter.Route(e)
 	tokenRouter.Route(e)
 	fileRouter.Route(e)
-
+	log.Info("SERVER STARTING")
 	srv := http.Server{
 		Addr:    cfg.RunAddr(),
 		Handler: e,
 	}
-
 	if err = srv.ListenAndServe(); err != http.ErrServerClosed {
 		return fmt.Errorf("listen and serve error: %w", err)
 	}

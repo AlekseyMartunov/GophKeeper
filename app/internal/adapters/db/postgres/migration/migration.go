@@ -11,16 +11,20 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-const homeDir = "GophKeeper"
+type config interface {
+	MigrationPath() string
+	PostgresDSN() string
+}
 
-func MigrationsUp(dsn string) error {
-	path, err := getHomeDir()
+func MigrationsUp(cfg config) error {
+	path := cfg.MigrationPath()
+	dsn := cfg.PostgresDSN()
+	workDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	path = filepath.Join("file:", path, "migrations")
-
+	path = filepath.Join("file:", workDir, path)
 	m, err := migrate.New(path, dsn)
 	if err != nil {
 		return fmt.Errorf("create migration instance error: %w", err)
@@ -36,13 +40,16 @@ func MigrationsUp(dsn string) error {
 	return nil
 }
 
-func MigrationsDown(dsn string) error {
-	path, err := getHomeDir()
+func MigrationsDown(cfg config) error {
+	path := cfg.MigrationPath()
+	dsn := cfg.PostgresDSN()
+
+	workDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	path = filepath.Join("file:", path, "migrations")
+	path = filepath.Join("file:", workDir, path)
 
 	m, err := migrate.New(path, dsn)
 	if err != nil {
@@ -56,16 +63,4 @@ func MigrationsDown(dsn string) error {
 		}
 	}
 	return nil
-}
-
-func getHomeDir() (string, error) {
-	path, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	for filepath.Base(path) != homeDir {
-		path = filepath.Dir(path)
-	}
-	return path, nil
 }

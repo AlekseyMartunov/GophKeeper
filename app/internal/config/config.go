@@ -10,23 +10,33 @@ type Config struct {
 	minioAccessKeyID     string `env:"MINIO_ACCESS_KEY_ID"`
 	minioSecretAccessKey string `env:"MINIO_SECRET_KEY_ID"`
 	minioEndpoint        string `env:"MINIO_ENDPOINT"`
+	migrationPath        string `env:"MIGRATION_PATH"`
 }
 
 func NewConfig() *Config {
-	return &Config{}
+	return &Config{
+		secretKey:            "default_secret_key",
+		salt:                 "some_salt",
+		postgresDSN:          "postgres://admin:1234@localhost:5432/test?sslmode=disable",
+		runAddr:              "127.0.0.1:8080",
+		minioEndpoint:        "127.0.0.1:9001",
+		minioAccessKeyID:     "minioServer",
+		minioSecretAccessKey: "minioServer123",
+		migrationPath:        "./migrations",
+	}
 }
 
 func (c *Config) ParseFlags() {
 	if key, ok := os.LookupEnv("SECRET_KEY"); ok {
-		c.runAddr = key
+		c.secretKey = key
 	}
 
 	if key, ok := os.LookupEnv("POSTGRES_DSN"); ok {
-		c.runAddr = key
+		c.postgresDSN = key
 	}
 
 	if key, ok := os.LookupEnv("SALT"); ok {
-		c.runAddr = key
+		c.salt = key
 	}
 
 	if key, ok := os.LookupEnv("RUN_ADDRESS"); ok {
@@ -34,15 +44,19 @@ func (c *Config) ParseFlags() {
 	}
 
 	if key, ok := os.LookupEnv("MINIO_ACCESS_KEY_ID"); ok {
-		c.runAddr = key
+		c.minioSecretAccessKey = key
 	}
 
 	if key, ok := os.LookupEnv("MINIO_SECRET_KEY_ID"); ok {
-		c.runAddr = key
+		c.minioSecretAccessKey = key
 	}
 
 	if key, ok := os.LookupEnv("MINIO_ENDPOINT"); ok {
-		c.runAddr = key
+		c.minioEndpoint = key
+	}
+
+	if key, ok := os.LookupEnv("MIGRATION_PATH"); ok {
+		c.migrationPath = key
 	}
 
 }
@@ -73,4 +87,8 @@ func (c *Config) MinioSecretAccessKey() string {
 
 func (c *Config) MinioEndpoint() string {
 	return c.minioEndpoint
+}
+
+func (c *Config) MigrationPath() string {
+	return c.migrationPath
 }
